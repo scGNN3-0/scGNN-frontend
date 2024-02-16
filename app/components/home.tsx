@@ -26,6 +26,7 @@ import {
 import { SideBar } from "./sidebar";
 import { useAppConfig } from "../store/config";
 import { AuthPage } from "./auth";
+import { RightLogPanel } from "./right-logpanel";
 import { getClientConfig } from "../config/client";
 import { ClientApi } from "../client/api";
 import { useAccessStore } from "../store";
@@ -161,6 +162,8 @@ function Screen() {
               <Route path={Path.Settings} element={<Settings />} />
             </Routes>
           </div>
+
+          <RightLogPanel className={isHome ? styles["right-sidebar-show"] : ""} />
         </>
       )}
     </div>

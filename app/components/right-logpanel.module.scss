@@ -1,0 +1,25 @@
+
+.right-logpanel {
+  top:0;
+  width: var(--sidebar-width);
+  box-sizing: border-box;
+  padding: 20px;
+  background-color: var(--second);
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset -2px 0px 2px 0px rgb(0, 0, 0, 0.05);
+  position: relative;
+  transition: width ease 0.05s;
+
+  .right-logpanel-header {
+    display: flex;
+    margin-bottom: 20px;
+
+    .right-logpanel-title {
+      font-size: 20px;
+      font-weight: bold;
+      animation: slide-in ease 0.3s;
+    }
+  }
+}
+

@@ -25,7 +25,7 @@
   .tight-container {
     --window-width: 100vw;
     --window-height: var(--full-height);
-    --window-content-width: calc(100% - var(--sidebar-width));
+    --window-content-width: calc(100% - var(--sidebar-width) - var(--sidebar-width));
 
     @include container();
 
@@ -126,6 +126,9 @@
 
   .sidebar-show {
     left: 0;
+  }
+  .right-sidebar-show {
+    right: 0;
   }
 
   .mobile {
