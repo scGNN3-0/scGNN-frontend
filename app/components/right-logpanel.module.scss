@@ -21,5 +21,21 @@
       animation: slide-in ease 0.3s;
     }
   }
+
+  .right-logpanel-body {
+    flex-grow: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .logs-area {
+      flex-grow: 1;
+      border: 1px solid var(--primary);
+      border-radius: 5px;
+      background-color: var(--white);
+      padding: 5px;
+      font-size: 0.8rem;
+    }
+  }
 }
 

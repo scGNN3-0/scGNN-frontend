@@ -12,7 +12,8 @@ export function RightLogPanel(
         </div>
       </div>
       <div className={styles["right-logpanel-body"]}>
-
+        <div className={styles["logs-area"]} >
+        </div>
       </div>
     </div>
   );
