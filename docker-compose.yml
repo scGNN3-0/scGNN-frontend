@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  scgnn-frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
+    depends_on:
+      - flask-app
+    networks:
+      - biochat
+    environment:
+      - OPENAI_API_KEY=$OPENAI_API_KEY
+      - GOOGLE_API_KEY=$GOOGLE_API_KEY
+      - CODE=$CODE
+      - OPENAI_ORG_ID=$OPENAI_ORG_ID
+      - HIDE_USER_API_KEY=$HIDE_USER_API_KEY
+      - DISABLE_GPT4=$DISABLE_GPT4
+      - ENABLE_BALANCE_QUERY=$ENABLE_BALANCE_QUERY
+      - DISABLE_FAST_LINK=$DISABLE_FAST_LINK
+      - OPENAI_SB=$OPENAI_SB
+      - BASE_URL=http://flask-app:5000
+
+
+
+  
