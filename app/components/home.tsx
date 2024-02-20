@@ -26,7 +26,7 @@ import {
 import { SideBar } from "./sidebar";
 import { useAppConfig } from "../store/config";
 import { AuthPage } from "./auth";
-import { RightLogPanel } from "./right-logpanel";
+import { RightLogsPanel } from "./right-logspanel";
 import { getClientConfig } from "../config/client";
 import { ClientApi } from "../client/api";
 import { useAccessStore } from "../store";
@@ -163,7 +163,7 @@ function Screen() {
             </Routes>
           </div>
 
-          <RightLogPanel className={isHome ? styles["right-sidebar-show"] : ""} />
+          <RightLogsPanel className={isHome ? styles["right-sidebar-show"] : ""} />
         </>
       )}
     </div>

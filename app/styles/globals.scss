@@ -221,6 +221,7 @@ input[type="range"]::-ms-thumb:hover {
 
 input[type="number"],
 input[type="text"],
+input[type="email"],
 input[type="password"] {
   appearance: none;
   border-radius: 10px;
@@ -231,6 +232,7 @@ input[type="password"] {
   color: var(--black);
   padding: 0 10px;
   max-width: 50%;
+  min-width: 200px;
   font-family: inherit;
 }
 

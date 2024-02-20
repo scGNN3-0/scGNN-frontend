@@ -41,8 +41,30 @@ export function AuthPage() {
 
       <input
         className={styles["auth-input"]}
+        type="text"
+        placeholder={Locale.Auth.UserNameInput}
+        value={accessStore.accessCode}
+        onChange={(e) => {
+          accessStore.update(
+            (access) => (access.accessCode = e.currentTarget.value),
+          );
+        }}
+      />
+      <input
+        className={styles["auth-input"]}
+        type="email"
+        placeholder={Locale.Auth.EmailInput}
+        value={accessStore.accessCode}
+        onChange={(e) => {
+          accessStore.update(
+            (access) => (access.accessCode = e.currentTarget.value),
+          );
+        }}
+      />
+      <input
+        className={styles["auth-input"]}
         type="password"
-        placeholder={Locale.Auth.Input}
+        placeholder={Locale.Auth.PasswordInput}
         value={accessStore.accessCode}
         onChange={(e) => {
           accessStore.update(
