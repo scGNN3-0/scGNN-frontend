@@ -1,3 +1,4 @@
+
 import {
   ApiPath,
   DEFAULT_API_HOST,
@@ -19,8 +20,6 @@ const DEFAULT_OPENAI_URL =
 const DEFAULT_ACCESS_STATE = {
   accessCode: "",
   useCustomConfig: false,
-  userName: "",
-  accessToken: "",
 
   provider: ServiceProvider.OpenAI,
 
@@ -68,7 +67,6 @@ export const useAccessStore = createPersistStore(
     isValidGoogle() {
       return ensure(get(), ["googleApiKey"]);
     },
-
     isAuthorized() {
       this.fetch();
 

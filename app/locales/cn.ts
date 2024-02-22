@@ -19,6 +19,9 @@ const cn = {
     EmailInput: "",
     Confirm: "确认",
     Later: "稍后再说",
+    SignIn: "",
+    SignUp: "",
+    Input: "",
   },
   ChatItem: {
     ChatItemCount: (count: number) => `${count} 条对话`,

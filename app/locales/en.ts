@@ -18,9 +18,12 @@ const en: LocaleType = {
     SubTips: "Or enter your OpenAI or Google API Key",
     UserNameInput: "user name",
     PasswordInput: "password",
-    EmailInput: "email (required for sign-up)",
+    EmailInput: "email",
     Confirm: "Confirm",
     Later: "Later",
+    SignIn: "Sign In",
+    SignUp: "Sign Up",
+    Input: "",
   },
   ChatItem: {
     ChatItemCount: (count: number) => `${count} messages`,
