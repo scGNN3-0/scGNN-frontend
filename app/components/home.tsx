@@ -3,6 +3,7 @@
 require("../polyfill");
 
 import { useState, useEffect } from "react";
+import { User } from "@supabase/auth-helpers-nextjs";
 
 import styles from "./home.module.scss";
 
@@ -26,7 +27,7 @@ import {
 import { SideBar } from "./sidebar";
 import { useAppConfig } from "../store/config";
 import { AuthPage } from "./auth";
-import { RightLogPanel } from "./right-logpanel";
+import { RightLogsPanel } from "./right-logspanel";
 import { getClientConfig } from "../config/client";
 import { ClientApi } from "../client/api";
 import { useAccessStore } from "../store";
@@ -123,7 +124,7 @@ const loadAsyncGoogleFont = () => {
   document.head.appendChild(linkEl);
 };
 
-function Screen() {
+function Screen({user}: {user: User | null}) {
   const config = useAppConfig();
   const location = useLocation();
   const isHome = location.pathname === Path.Home;
@@ -147,7 +148,7 @@ function Screen() {
     >
       {isAuth ? (
         <>
-          <AuthPage />
+          <AuthPage user={user} />
         </>
       ) : (
         <>
@@ -163,7 +164,7 @@ function Screen() {
             </Routes>
           </div>
 
-          <RightLogPanel className={isHome ? styles["right-sidebar-show"] : ""} />
+          <RightLogsPanel className={isHome ? styles["right-sidebar-show"] : ""} />
         </>
       )}
     </div>
@@ -188,7 +189,7 @@ export function useLoadData() {
   }, []);
 }
 
-export function Home() {
+export function Home({user}: {user: User | null}) {
   useSwitchTheme();
   useLoadData();
   useHtmlLang();
@@ -205,7 +206,7 @@ export function Home() {
   return (
     <ErrorBoundary>
       <Router>
-        <Screen />
+        <Screen user={user}/>
       </Router>
     </ErrorBoundary>
   );

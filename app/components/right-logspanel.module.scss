@@ -1,5 +1,5 @@
 
-.right-logpanel {
+.right-logspanel {
   top:0;
   width: var(--sidebar-width);
   box-sizing: border-box;
@@ -11,18 +11,18 @@
   position: relative;
   transition: width ease 0.05s;
 
-  .right-logpanel-header {
+  .right-logspanel-header {
     display: flex;
     margin-bottom: 20px;
 
-    .right-logpanel-title {
+    .right-logspanel-title {
       font-size: 20px;
       font-weight: bold;
       animation: slide-in ease 0.3s;
     }
   }
 
-  .right-logpanel-body {
+  .right-logspanel-body {
     flex-grow: 1;
     width: 100%;
     display: flex;

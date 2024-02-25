@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { User } from "@supabase/auth-helpers-nextjs";
+
 import styles from "./auth.module.scss";
 import { IconButton } from "./button";
 
@@ -7,10 +10,10 @@ import { useAccessStore } from "../store";
 import Locale from "../locales";
 
 import BotIcon from "../icons/bot.svg";
-import { useEffect } from "react";
+import LeftIcon from "../icons/left.svg";
 import { getClientConfig } from "../config/client";
 
-export function AuthPage() {
+export function AuthPage({user}: {user: User | null}) {
   const navigate = useNavigate();
   const accessStore = useAccessStore();
 
@@ -31,7 +34,18 @@ export function AuthPage() {
   }, []);
 
   return (
-    <div className={styles["auth-page"]}>
+    <>
+    {user? (<div>You've signed in.</div>) : (
+      <div className={styles["auth-container"]}>
+        <div className={styles["auth-header"]}>
+          <IconButton
+            icon={<LeftIcon />}
+            text="Return"
+            onClick={() => navigate(Path.Home)}
+          >            
+          </IconButton>
+        </div>
+      <div className={styles["auth-page"]}>
       <div className={`no-dark ${styles["auth-logo"]}`}>
         <BotIcon />
       </div>
@@ -41,8 +55,8 @@ export function AuthPage() {
 
       <input
         className={styles["auth-input"]}
-        type="password"
-        placeholder={Locale.Auth.Input}
+        type="email"
+        placeholder={Locale.Auth.EmailInput}
         value={accessStore.accessCode}
         onChange={(e) => {
           accessStore.update(
@@ -50,42 +64,25 @@ export function AuthPage() {
           );
         }}
       />
-      {!accessStore.hideUserApiKey ? (
-        <>
-          <div className={styles["auth-tips"]}>{Locale.Auth.SubTips}</div>
-          <input
-            className={styles["auth-input"]}
-            type="password"
-            placeholder={Locale.Settings.Access.OpenAI.ApiKey.Placeholder}
-            value={accessStore.openaiApiKey}
-            onChange={(e) => {
-              accessStore.update(
-                (access) => (access.openaiApiKey = e.currentTarget.value),
-              );
-            }}
-          />
-          <input
-            className={styles["auth-input"]}
-            type="password"
-            placeholder={Locale.Settings.Access.Google.ApiKey.Placeholder}
-            value={accessStore.googleApiKey}
-            onChange={(e) => {
-              accessStore.update(
-                (access) => (access.googleApiKey = e.currentTarget.value),
-              );
-            }}
-          />
-        </>
-      ) : null}
-
+      <input
+        className={styles["auth-input"]}
+        type="password"
+        placeholder={Locale.Auth.PasswordInput}
+        value={accessStore.accessCode}
+        onChange={(e) => {
+          accessStore.update(
+            (access) => (access.accessCode = e.currentTarget.value),
+          );
+        }}
+      />
       <div className={styles["auth-actions"]}>
         <IconButton
-          text={Locale.Auth.Confirm}
+          text={Locale.Auth.SignIn}
           type="primary"
           onClick={goChat}
         />
         <IconButton
-          text={Locale.Auth.Later}
+          text={Locale.Auth.SignUp}
           onClick={() => {
             resetAccessCode();
             goHome();
@@ -93,5 +90,8 @@ export function AuthPage() {
         />
       </div>
     </div>
-  );
+    </div>
+    )}
+    </>
+  )
 }

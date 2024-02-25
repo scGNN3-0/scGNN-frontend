@@ -1,3 +1,4 @@
+
 import {
   ApiPath,
   DEFAULT_API_HOST,
@@ -66,7 +67,6 @@ export const useAccessStore = createPersistStore(
     isValidGoogle() {
       return ensure(get(), ["googleApiKey"]);
     },
-
     isAuthorized() {
       this.fetch();
 
