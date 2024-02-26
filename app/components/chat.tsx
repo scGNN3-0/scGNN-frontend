@@ -27,6 +27,7 @@ import PinIcon from "../icons/pin.svg";
 import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
+import UploadIcon from "../icons/file-upload.svg";
 
 import LightIcon from "../icons/light.svg";
 import DarkIcon from "../icons/dark.svg";
@@ -89,10 +90,14 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { FileUploadModal } from "./file-upload";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
 });
+const FileUpload = dynamic(async () => (await import("./file-upload")).FileUploadModal, {
+  loading: () => <LoadingIcon />,
+})
 
 export function SessionConfigModel(props: { onClose: () => void }) {
   const chatStore = useChatStore();
@@ -409,6 +414,7 @@ export function ChatActions(props: {
   showPromptModal: () => void;
   scrollToBottom: () => void;
   showPromptHints: () => void;
+  showFileUploadModal: () => void;
   hitBottom: boolean;
 }) {
   const config = useAppConfig();
@@ -544,6 +550,12 @@ export function ChatActions(props: {
           }}
         />
       )}
+
+      <ChatAction
+        onClick={props.showFileUploadModal}
+        text="upload file"
+        icon={<UploadIcon />}
+      />
     </div>
   );
 }
@@ -975,6 +987,7 @@ function _Chat() {
       : -1;
 
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [showFileUploadModal, setShowUploadModal] = useState(false);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
 
@@ -1115,6 +1128,13 @@ function _Chat() {
           showModal={showPromptModal}
           setShowModal={setShowPromptModal}
         />
+
+        {showFileUploadModal 
+        && (
+        <FileUploadModal
+          onClose={() => setShowUploadModal(false)}
+        />
+        )}
       </div>
 
       <div
@@ -1267,6 +1287,7 @@ function _Chat() {
 
         <ChatActions
           showPromptModal={() => setShowPromptModal(true)}
+          showFileUploadModal={() => setShowUploadModal(true)}
           scrollToBottom={scrollToBottom}
           hitBottom={hitBottom}
           showPromptHints={() => {
