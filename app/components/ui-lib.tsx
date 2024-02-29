@@ -491,14 +491,14 @@ export function Selector<T>(props: {
 }
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
-export function ReactDropZone({ accept, open, disabled, onUpload, fileLabel }: {
+export function ReactDropZone({ accept, open, disabled, onUpload, fileTypeLabel }: {
   accept: Record<string, Array<string>>;
   open?: () => void;
   disabled?: boolean
   onUpload: (_: File, done: () => void) => Promise<void>;
-  fileLabel?: string;
+  fileTypeLabel?: string;
 }) {
-  const theFileLabel = fileLabel ?? "TXT, PDF";
+  const theFileLabel = fileTypeLabel ?? "TXT, PDF";
   const [fileToUpload, setFileToUpload] = useState<File | undefined>();
   function onFileDrop(acceptedFiles: Array<File>) {
     const file = acceptedFiles.length > 0 ? acceptedFiles[0] : undefined;

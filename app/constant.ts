@@ -10,6 +10,7 @@ export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
 export const DEFAULT_API_HOST = "https://api.nextchat.dev";
 export const OPENAI_BASE_URL = "https://api.openai.com";
+export const LOCAL_BASE_URL = "http://localhost:5001"
 
 export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/";
 
@@ -25,6 +26,8 @@ export enum Path {
 export enum ApiPath {
   Cors = "/api/cors",
   OpenAI = "/api/openai",
+  File = "/api/file",
+  Logs = "/api/logs",
 }
 
 export enum SlotID {
@@ -45,6 +48,7 @@ export enum StoreKey {
   Prompt = "prompt-store",
   Update = "chat-update",
   Sync = "sync",
+  Logs = "logs",
 }
 
 export const DEFAULT_SIDEBAR_WIDTH = 300;
@@ -282,3 +286,20 @@ export const DEFAULT_MODELS = [
 
 export const CHAT_PAGE_SIZE = 15;
 export const MAX_RENDER_MSG_COUNT = 45;
+
+// scGNN-server error
+export const ERROR_SCGNNSERVER_OK = 0
+export const ERROR_SCGNNSERVER_UNKNOWN = 5000
+ 
+export const HDR_CONTENT_TYPE = "Content-Type";
+export const HDR_APPLICATION_JSON = "application/json";
+
+export const scGNNPath = {
+  ChatPath: "v1/chat/completions",
+  FileUpload: "v1/file",
+  Logs: "v1/logs",
+  AllDocuments: "v1/rag/alldocuments",
+  Document: "v1/rag/document",
+  RAGConnectionStatus: "v1/rag/connectionstatus",
+  KGConnectionStatus: "v1/kg/connectionstatus",
+}

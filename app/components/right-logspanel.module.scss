@@ -13,12 +13,18 @@
 
   .right-logspanel-header {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     margin-bottom: 20px;
 
     .right-logspanel-title {
       font-size: 20px;
       font-weight: bold;
       animation: slide-in ease 0.3s;
+    }
+    
+    .right-logspanel-clear {
+      font-size: 16px;
     }
   }
 

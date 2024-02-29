@@ -137,3 +137,9 @@ export async function requestOpenai(req: NextRequest) {
     clearTimeout(timeoutId);
   }
 }
+
+export interface SCGNNServerResponse {
+  code: number;
+  error?: string;
+}
+

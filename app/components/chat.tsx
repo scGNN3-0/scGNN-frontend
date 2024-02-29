@@ -35,11 +35,13 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import LogsIcon from "../icons/logs.svg";
 
 import {
   ChatMessage,
   SubmitKey,
   useChatStore,
+  useLogsStore,
   BOT_HELLO,
   createMessage,
   useAccessStore,
@@ -91,6 +93,7 @@ import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
 import { FileUploadModal } from "./file-upload";
+import { requestLogs } from "./data-provider/dataaccessor";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -626,6 +629,7 @@ function _Chat() {
   type RenderMessage = ChatMessage & { preview?: boolean };
 
   const chatStore = useChatStore();
+  const logsStore = useLogsStore();
   const session = chatStore.currentSession();
   const config = useAppConfig();
   const fontSize = config.fontSize;
@@ -880,6 +884,23 @@ function _Chat() {
         setShowPromptModal(true);
       },
     });
+  };
+
+  const onDisplayLogs = async (taskId?: string) => {
+    if (taskId === undefined || taskId === null) {
+      return;
+    }
+    try {
+      const response = await requestLogs(taskId);
+      const jsonBody = await response.json();
+      if (jsonBody.log) {
+        logsStore.setLogs(jsonBody.log);
+      } else if (jsonBody.error) {
+        logsStore.setLogs(jsonBody.error);
+      }
+    } catch (e: any) {
+      logsStore.setLogs(e.message);
+    }
   };
 
   const context: RenderMessage[] = useMemo(() => {
@@ -1239,6 +1260,13 @@ function _Chat() {
                                 icon={<CopyIcon />}
                                 onClick={() => copyToClipboard(message.content)}
                               />
+                              {message.taskId ? (
+                                <ChatAction
+                                  text="Logs"
+                                  icon={<LogsIcon />}
+                                  onClick={() => onDisplayLogs(message.taskId)}
+                                ></ChatAction>
+                              ) : (<></>)}                              
                             </>
                           )}
                         </div>

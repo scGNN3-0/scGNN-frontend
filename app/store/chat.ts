@@ -29,6 +29,7 @@ export type ChatMessage = RequestMessage & {
   isError?: boolean;
   id: string;
   model?: ModelType;
+  taskId?: string;
 };
 
 export function createMessage(override: Partial<ChatMessage>): ChatMessage {
@@ -49,6 +50,7 @@ export interface ChatStat {
 
 export interface ChatSession {
   id: string;
+  jobId?: string;
   topic: string;
 
   memoryPrompt: string;
@@ -338,8 +340,9 @@ export const useChatStore = createPersistStore(
               session.messages = session.messages.concat();
             });
           },
-          onFinish(message) {
+          onFinish(message, taskId?: string) {
             botMessage.streaming = false;
+            botMessage.taskId = taskId;
             if (message) {
               botMessage.content = message;
               get().onNewMessage(botMessage);
@@ -534,7 +537,7 @@ export const useChatStore = createPersistStore(
             config: {
               model: getSummarizeModel(session.mask.modelConfig.model),
             },
-            onFinish(message) {
+            onFinish(message, _taskId?: string) {
               get().updateCurrentSession(
                 (session) =>
                   (session.topic =
@@ -592,7 +595,7 @@ export const useChatStore = createPersistStore(
             onUpdate(message) {
               session.memoryPrompt = message;
             },
-            onFinish(message) {
+            onFinish(message, _taskId?: string) {
               console.log("[Memory] ", message);
               get().updateCurrentSession((session) => {
                 session.lastSummarizeIndex = lastSummarizeIndex;
