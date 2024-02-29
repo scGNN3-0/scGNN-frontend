@@ -296,7 +296,7 @@ export const HDR_APPLICATION_JSON = "application/json";
 
 export const scGNNPath = {
   ChatPath: "v1/chat/completions",
-  FileUpload: "v1/file",
+  FileUpload: "v1/upload",
   Logs: "v1/logs",
   AllDocuments: "v1/rag/alldocuments",
   Document: "v1/rag/document",

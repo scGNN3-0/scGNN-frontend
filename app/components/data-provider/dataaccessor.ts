@@ -8,12 +8,14 @@ function get_json_header(): Record<string, string> {
 }
 
 export const requestUploadFile = async (
+  jobId: string,
   file: File,
 ) => {
   const FILEUPLOAD = ApiPath.File;
   let uploadPath = FILEUPLOAD;
   const data = new FormData();
   data.set('file', file);
+  data.set('jobId', jobId);
   const res = await fetch(uploadPath, {
     method: "POST",
     body: data,

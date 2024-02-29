@@ -4,11 +4,18 @@ import styles from "./file-upload.module.scss";
 import { requestUploadFile } from "./data-provider/dataaccessor";
 
 export function FileUploadModal(
-  {onClose}: {onClose: () => void}
+  {onClose, jobId, onUploaded}: 
+  {
+    onClose: () => void, 
+    jobId?: string,
+    onUploaded: (message: string) => void
+  }
 ) {
   async function onUpload(file: File, done: () => void) {
     try {
-      const res = await requestUploadFile(file);
+      const res = await requestUploadFile(jobId??"", file);
+      const jsonBody = await res.json();
+      onUploaded(jsonBody.message??"");
     } catch (e: any) {
       console.log(e);
     }

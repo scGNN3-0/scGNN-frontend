@@ -285,6 +285,23 @@ export const useChatStore = createPersistStore(
         get().summarizeSession();
       },
 
+      addNewBotMessage(message: string, streaming?: boolean) {
+        const session = get().currentSession();
+        const modelConfig = session.mask.modelConfig;
+        const botMessage = createMessage({
+          role: "assistant",
+          streaming: streaming??false,
+          model: modelConfig.model,
+          content: message,
+        });
+        get().updateCurrentSession((session) => {
+          session.messages = session.messages.concat([
+            botMessage,
+          ]);
+        });
+        get().onNewMessage(botMessage);
+      },
+
       async onUserInput(content: string) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;

@@ -894,12 +894,12 @@ function _Chat() {
       const response = await requestLogs(taskId);
       const jsonBody = await response.json();
       if (jsonBody.log) {
-        logsStore.setLogs(jsonBody.log);
+        logsStore.setLogs(taskId, jsonBody.log);
       } else if (jsonBody.error) {
-        logsStore.setLogs(jsonBody.error);
+        logsStore.setLogs(taskId, jsonBody.error);
       }
     } catch (e: any) {
-      logsStore.setLogs(e.message);
+      logsStore.setLogs(taskId, e.message);
     }
   };
 
@@ -1011,6 +1011,7 @@ function _Chat() {
   const [showFileUploadModal, setShowUploadModal] = useState(false);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
+  const appConfig = useAppConfig.getState();
 
   const autoFocus = !isMobileScreen; // wont auto focus on mobile screen
   const showMaxIcon = !isMobileScreen && !clientConfig?.isApp;
@@ -1064,6 +1065,13 @@ function _Chat() {
 
   // edit / insert message modal
   const [isEditingMessage, setIsEditingMessage] = useState(false);
+
+  function onFileUploaded(message: string) {
+    if (message.length === 0) {
+      return;
+    }
+    chatStore.addNewBotMessage(message);
+  }
 
   // remember unfinished input
   useEffect(() => {
@@ -1154,6 +1162,8 @@ function _Chat() {
         && (
         <FileUploadModal
           onClose={() => setShowUploadModal(false)}
+          jobId={session.jobId}
+          onUploaded={onFileUploaded}
         />
         )}
       </div>

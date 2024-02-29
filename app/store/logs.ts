@@ -3,10 +3,12 @@ import { StoreKey } from "../constant";
 
 export interface LogsData {
   content: string;
+  taskId: string;
 }
 
 export const createEmptyLogs = (): LogsData => ({
-  content: ""
+  content: "",
+  taskId: "",
 });
 
 export const DEFAULT_LOGS_STATE = {
@@ -18,15 +20,17 @@ export const useLogsStore = createPersistStore(
   { ...DEFAULT_LOGS_STATE },
   (set, get) => {
     const methods = {
-      setLogs(content?: string) {
+      setLogs(taskId: string, content?: string) {
+        content = content ?? "";
         set({
           logs: {
-            content: content ?? "",
+            content,
+            taskId,
           }
         })
       },
       getLogs() {
-        return get().logs.content;
+        return get().logs;
       }
     };
     return methods;
