@@ -27,6 +27,7 @@ import PinIcon from "../icons/pin.svg";
 import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
+import UploadIcon from "../icons/file-upload.svg";
 
 import LightIcon from "../icons/light.svg";
 import DarkIcon from "../icons/dark.svg";
@@ -34,11 +35,13 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import LogsIcon from "../icons/logs.svg";
 
 import {
   ChatMessage,
   SubmitKey,
   useChatStore,
+  useLogsStore,
   BOT_HELLO,
   createMessage,
   useAccessStore,
@@ -89,10 +92,15 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { FileUploadModal } from "./file-upload";
+import { requestLogs } from "./data-provider/dataaccessor";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
 });
+const FileUpload = dynamic(async () => (await import("./file-upload")).FileUploadModal, {
+  loading: () => <LoadingIcon />,
+})
 
 export function SessionConfigModel(props: { onClose: () => void }) {
   const chatStore = useChatStore();
@@ -409,6 +417,7 @@ export function ChatActions(props: {
   showPromptModal: () => void;
   scrollToBottom: () => void;
   showPromptHints: () => void;
+  showFileUploadModal: () => void;
   hitBottom: boolean;
 }) {
   const config = useAppConfig();
@@ -544,6 +553,12 @@ export function ChatActions(props: {
           }}
         />
       )}
+
+      <ChatAction
+        onClick={props.showFileUploadModal}
+        text="upload file"
+        icon={<UploadIcon />}
+      />
     </div>
   );
 }
@@ -614,6 +629,7 @@ function _Chat() {
   type RenderMessage = ChatMessage & { preview?: boolean };
 
   const chatStore = useChatStore();
+  const logsStore = useLogsStore();
   const session = chatStore.currentSession();
   const config = useAppConfig();
   const fontSize = config.fontSize;
@@ -870,6 +886,23 @@ function _Chat() {
     });
   };
 
+  const onDisplayLogs = async (taskId?: string) => {
+    if (taskId === undefined || taskId === null) {
+      return;
+    }
+    try {
+      const response = await requestLogs(taskId);
+      const jsonBody = await response.json();
+      if (jsonBody.log) {
+        logsStore.setLogs(taskId, jsonBody.log);
+      } else if (jsonBody.error) {
+        logsStore.setLogs(taskId, jsonBody.error);
+      }
+    } catch (e: any) {
+      logsStore.setLogs(taskId, e.message);
+    }
+  };
+
   const context: RenderMessage[] = useMemo(() => {
     return session.mask.hideContext ? [] : session.mask.context.slice();
   }, [session.mask.context, session.mask.hideContext]);
@@ -975,8 +1008,10 @@ function _Chat() {
       : -1;
 
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [showFileUploadModal, setShowUploadModal] = useState(false);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
+  const appConfig = useAppConfig.getState();
 
   const autoFocus = !isMobileScreen; // wont auto focus on mobile screen
   const showMaxIcon = !isMobileScreen && !clientConfig?.isApp;
@@ -1030,6 +1065,13 @@ function _Chat() {
 
   // edit / insert message modal
   const [isEditingMessage, setIsEditingMessage] = useState(false);
+
+  function onFileUploaded(message: string) {
+    if (message.length === 0) {
+      return;
+    }
+    chatStore.addNewBotMessage(message);
+  }
 
   // remember unfinished input
   useEffect(() => {
@@ -1115,6 +1157,15 @@ function _Chat() {
           showModal={showPromptModal}
           setShowModal={setShowPromptModal}
         />
+
+        {showFileUploadModal 
+        && (
+        <FileUploadModal
+          onClose={() => setShowUploadModal(false)}
+          jobId={session.jobId}
+          onUploaded={onFileUploaded}
+        />
+        )}
       </div>
 
       <div
@@ -1219,6 +1270,13 @@ function _Chat() {
                                 icon={<CopyIcon />}
                                 onClick={() => copyToClipboard(message.content)}
                               />
+                              {message.taskId ? (
+                                <ChatAction
+                                  text="Logs"
+                                  icon={<LogsIcon />}
+                                  onClick={() => onDisplayLogs(message.taskId)}
+                                ></ChatAction>
+                              ) : (<></>)}                              
                             </>
                           )}
                         </div>
@@ -1267,6 +1325,7 @@ function _Chat() {
 
         <ChatActions
           showPromptModal={() => setShowPromptModal(true)}
+          showFileUploadModal={() => setShowUploadModal(true)}
           scrollToBottom={scrollToBottom}
           hitBottom={hitBottom}
           showPromptHints={() => {

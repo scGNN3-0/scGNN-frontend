@@ -7,7 +7,7 @@ import {
   REQUEST_TIMEOUT_MS,
   ServiceProvider,
 } from "@/app/constant";
-import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
+import { ChatSession, useAccessStore, useAppConfig, useChatStore } from "@/app/store";
 
 import { ChatOptions, getHeaders, LLMApi, LLMModel, LLMUsage } from "../api";
 import Locale from "../../locales";
@@ -67,8 +67,13 @@ export class ChatGPTApi implements LLMApi {
     return [baseUrl, path].join("/");
   }
 
-  extractMessage(res: any) {
-    return res.choices?.at(0)?.message?.content ?? "";
+  extractFromResponse(res: any) {
+    // return res.choices?.at(0)?.message?.content ?? "";
+    return {
+      jobId: res.job_id, 
+      taskId: res.task_id, 
+      message: res.chatgpt_response,
+    };
   }
 
   async chat(options: ChatOptions) {
@@ -84,7 +89,9 @@ export class ChatGPTApi implements LLMApi {
         model: options.config.model,
       },
     };
-
+    const theJobId = useChatStore.getState().currentSession().jobId ?? "";
+    const isStart = useChatStore.getState().currentSession().jobId ? false : true;
+    const userInput = messages.length > 0 ? messages[messages.length-1].content : "";
     const requestPayload = {
       messages,
       stream: options.config.stream,
@@ -95,6 +102,9 @@ export class ChatGPTApi implements LLMApi {
       top_p: modelConfig.top_p,
       // max_tokens: Math.max(modelConfig.max_tokens, 1024),
       // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
+      job_id: theJobId,
+      is_start: isStart,
+      user_input: userInput,
     };
 
     console.log("[Request] openai payload: ", requestPayload);
@@ -231,8 +241,16 @@ export class ChatGPTApi implements LLMApi {
         clearTimeout(requestTimeoutId);
 
         const resJson = await res.json();
-        const message = this.extractMessage(resJson);
-        options.onFinish(message);
+        const {message, jobId, taskId} = this.extractFromResponse(resJson);
+        if (isStart) {
+          useChatStore.getState().updateCurrentSession(
+            (session: ChatSession) => {
+              session.jobId = jobId;
+            }
+          )
+        }
+
+        options.onFinish(message, taskId);
       }
     } catch (e) {
       console.log("[Request] failed to make a chat request", e);
