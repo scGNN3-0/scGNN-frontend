@@ -13,7 +13,7 @@ import BotIcon from "../icons/bot.svg";
 import LeftIcon from "../icons/left.svg";
 import { getClientConfig } from "../config/client";
 
-export function AuthPage({user}: {user: User | null}) {
+export function AuthPage({user}: {user: string | null}) {
   const navigate = useNavigate();
   const accessStore = useAccessStore();
 
