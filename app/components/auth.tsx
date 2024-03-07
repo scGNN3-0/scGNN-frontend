@@ -39,11 +39,11 @@ export function AuthPage({user}: {user: User | null}) {
       <div className={styles["auth-container"]}>
         <div className={styles["auth-header"]}>
           <IconButton
+            key="retrun"
             icon={<LeftIcon />}
             text="Return"
             onClick={() => navigate(Path.Home)}
-          >            
-          </IconButton>
+          />          
         </div>
       <div className={styles["auth-page"]}>
       <div className={`no-dark ${styles["auth-logo"]}`}>
