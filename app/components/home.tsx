@@ -124,7 +124,7 @@ const loadAsyncGoogleFont = () => {
   document.head.appendChild(linkEl);
 };
 
-function Screen({user}: {user: User | null}) {
+function Screen({user}: {user: string | null}) {
   const config = useAppConfig();
   const location = useLocation();
   const isHome = location.pathname === Path.Home;
@@ -189,7 +189,7 @@ export function useLoadData() {
   }, []);
 }
 
-export function Home({user}: {user: User | null}) {
+export function Home({user}: {user: string | null}) {
   useSwitchTheme();
   useLoadData();
   useHtmlLang();
