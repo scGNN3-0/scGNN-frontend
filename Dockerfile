@@ -4,6 +4,9 @@ FROM base AS deps
 
 RUN apk add --no-cache libc6-compat
 
+ENV PYTHON /usr/bin/python3
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 COPY package.json yarn.lock ./
