@@ -69,11 +69,14 @@ export class ChatGPTApi implements LLMApi {
 
   extractFromResponse(res: any) {
     // return res.choices?.at(0)?.message?.content ?? "";
-    return {
-      jobId: res.job_id, 
-      taskId: res.task_id, 
+    const jobId = res.job_id ?? "";
+    const taskId = res.task_id ?? "";
+    const result =  {
+      jobId: jobId.toString(), 
+      taskId: taskId.toString(),
       message: res.chatgpt_response,
     };
+    return result;
   }
 
   async chat(options: ChatOptions) {
@@ -245,7 +248,7 @@ export class ChatGPTApi implements LLMApi {
         if (isStart) {
           useChatStore.getState().updateCurrentSession(
             (session: ChatSession) => {
-              session.jobId = jobId;
+              session.jobId = jobId.toString();
             }
           )
         }

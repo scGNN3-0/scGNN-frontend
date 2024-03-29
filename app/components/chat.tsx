@@ -28,6 +28,7 @@ import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
 import UploadIcon from "../icons/file-upload.svg";
+import DownloadIcon from "../icons/file-download.svg";
 
 import LightIcon from "../icons/light.svg";
 import DarkIcon from "../icons/dark.svg";
@@ -49,6 +50,7 @@ import {
   useAppConfig,
   DEFAULT_TOPIC,
   ModelType,
+  ChatSession,
 } from "../store";
 
 import {
@@ -94,6 +96,7 @@ import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
 import { FileUploadModal } from "./file-upload";
 import { requestLogs } from "./data-provider/dataaccessor";
+import { FileDownloadModal } from "./file-download";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -345,7 +348,7 @@ function ChatAction(props: {
     full: 16,
     icon: 16,
   });
-
+  
   function updateWidth() {
     if (!iconRef.current || !textRef.current) return;
     const getWidth = (dom: HTMLDivElement) => dom.getBoundingClientRect().width;
@@ -418,7 +421,9 @@ export function ChatActions(props: {
   scrollToBottom: () => void;
   showPromptHints: () => void;
   showFileUploadModal: () => void;
+  showFileDownloadModal: () => void;
   hitBottom: boolean;
+  session: ChatSession;
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -554,11 +559,19 @@ export function ChatActions(props: {
         />
       )}
 
-      <ChatAction
+      {(props.session.jobId !== undefined)
+      && (<ChatAction
         onClick={props.showFileUploadModal}
         text="upload file"
         icon={<UploadIcon />}
-      />
+      />)}
+      
+      {(props.session.jobId !== undefined) 
+      && (<ChatAction
+        onClick={props.showFileDownloadModal}
+        text="download file"
+        icon={<DownloadIcon />}
+      />)}
     </div>
   );
 }
@@ -1009,6 +1022,7 @@ function _Chat() {
 
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [showFileUploadModal, setShowUploadModal] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
 
   const clientConfig = useMemo(() => getClientConfig(), []);
   const appConfig = useAppConfig.getState();
@@ -1071,6 +1085,9 @@ function _Chat() {
       return;
     }
     chatStore.addNewBotMessage(message);
+  }
+  function onFileDownloaded(_message: string) {
+    
   }
 
   // remember unfinished input
@@ -1165,6 +1182,15 @@ function _Chat() {
           jobId={session.jobId}
           onUploaded={onFileUploaded}
         />
+        )}
+
+        {showDownloadModal
+        && (
+          <FileDownloadModal
+            onClose={() => setShowDownloadModal(false)}
+            jobId={session.jobId}
+            onDownloaded={onFileDownloaded}
+          />
         )}
       </div>
 
@@ -1326,6 +1352,7 @@ function _Chat() {
         <ChatActions
           showPromptModal={() => setShowPromptModal(true)}
           showFileUploadModal={() => setShowUploadModal(true)}
+          showFileDownloadModal={() => setShowDownloadModal(true)}
           scrollToBottom={scrollToBottom}
           hitBottom={hitBottom}
           showPromptHints={() => {
@@ -1339,6 +1366,7 @@ function _Chat() {
             setUserInput("/");
             onSearch("");
           }}
+          session={session}
         />
         <div className={styles["chat-input-panel-inner"]}>
           <textarea

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSideConfig } from "@/app/config/server";
-import { ERROR_SCGNNSERVER_OK, LOCAL_BASE_URL, scGNNPath } from "@/app/constant";
+import { ERROR_OK, LOCAL_BASE_URL, scGNNPath } from "@/app/constant";
 import { SCGNNServerResponse } from "../common";
 import { prettyObject } from "@/app/utils/format";
 
 const serverConfig = getServerSideConfig();
 
-async function request_upload_file(
-  formData: FormData
-) {
+function get_baseurl(): string {
   let baseUrl = serverConfig.baseUrl ?? LOCAL_BASE_URL;
 
   if (!baseUrl.startsWith("http")) {
@@ -18,9 +16,17 @@ async function request_upload_file(
   if (baseUrl.endsWith("/")) {
     baseUrl = baseUrl.slice(0, -1);
   }
-  const path = scGNNPath.FileUpload;
+  return baseUrl;
+}
+
+async function request_upload_file(
+  formData: FormData
+) {
+  
+  const path = scGNNPath.JobFile;
   const jobId = formData.get('jobId');
   const file = formData.get('file');
+  const baseUrl = get_baseurl();
   const fetchUrl = `${baseUrl}/${path}/${jobId}`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
@@ -45,7 +51,7 @@ async function request_upload_file(
   }
 }
 
-async function handle(request: NextRequest) {
+async function handlePost(request: NextRequest) {
   try {
     const contentType = request.headers.get("Content-Type");
     const data = await request.formData();
@@ -57,4 +63,38 @@ async function handle(request: NextRequest) {
   }
 }
 
-export const POST = handle;
+async function handleGet(request: NextRequest) {
+  const jobId = request.nextUrl.searchParams.get("jobId");
+  const filename = request.nextUrl.searchParams.get("filename");
+  const baseUrl = get_baseurl();
+  const path = scGNNPath.JobFile;
+  const fetchUrl = `${baseUrl}/${path}/${jobId}/${filename}`;
+  try {
+    const res = await fetch(fetchUrl, {
+      method: "GET",
+    });
+    return res;
+  } catch (e: any) {
+    console.error(e);
+  }
+}
+
+async function handleDelete(request: NextRequest) {
+  const jobId = request.nextUrl.searchParams.get("jobId");
+  const filename = request.nextUrl.searchParams.get("filename");
+  const baseUrl = get_baseurl();
+  const path = scGNNPath.JobFile;
+  const fetchUrl = `${baseUrl}/${path}/${jobId}/${filename}`;
+  try {
+    const res = await fetch(fetchUrl, {
+      method: "DELETE",
+    });
+    return res;
+  } catch (e: any) {
+    console.error(e);
+  }
+}
+
+export const POST = handlePost;
+export const GET = handleGet;
+export const DELETE = handleDelete;
