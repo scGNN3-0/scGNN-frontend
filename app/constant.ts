@@ -27,6 +27,7 @@ export enum ApiPath {
   Cors = "/api/cors",
   OpenAI = "/api/openai",
   File = "/api/file",
+  Files = "/api/obtainJobFiles",
   Logs = "/api/logs",
 }
 
@@ -288,15 +289,17 @@ export const CHAT_PAGE_SIZE = 15;
 export const MAX_RENDER_MSG_COUNT = 45;
 
 // scGNN-server error
-export const ERROR_SCGNNSERVER_OK = 0
-export const ERROR_SCGNNSERVER_UNKNOWN = 5000
+export const ERROR_OK = 0;
+export const ERROR_UNKNOWN = 1000;
+export const ERROR_INVALID_INPUT = 1001;
  
 export const HDR_CONTENT_TYPE = "Content-Type";
 export const HDR_APPLICATION_JSON = "application/json";
 
 export const scGNNPath = {
   ChatPath: "v1/chat/completions",
-  FileUpload: "v1/upload",
+  JobFile: "v1/file",
+  JobFiles: "v1/files",
   Logs: "v1/logs",
   AllDocuments: "v1/rag/alldocuments",
   Document: "v1/rag/document",

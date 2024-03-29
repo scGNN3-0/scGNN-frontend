@@ -37,3 +37,52 @@ export const requestLogs = async (
   });
   return response;
 }
+
+export const requestJobFiles = async (jobId: string) => {
+  const FILEURL = ApiPath.Files + '/' + jobId;
+  try {
+    const res = await fetch(FILEURL, {
+      method: "POST",      
+    })
+    return res;
+  } catch (e: any) {
+    console.log(e);
+  }
+}
+
+export const requestDownloadJobFile = async (
+  jobId: string, filename: string
+) => {
+  const fetchUrl = ApiPath.File + '?' + new URLSearchParams({
+    jobId,
+    filename,
+  });
+  try {
+    const res = await fetch(fetchUrl, {method: "GET"});
+    const data = await res.blob();
+    const url = window.URL.createObjectURL(new Blob([data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (e: any) {
+    console.error(e);
+  }
+}
+
+export const requestRemoveJobFile = async (
+  jobId: string, filename: string
+) => {
+  const fetchUrl = ApiPath.File + '?' + new URLSearchParams({
+    jobId,
+    filename,
+  });
+  try {
+    const res = await fetch(fetchUrl, {method: "DELETE"});
+  } catch (e: any) {
+    console.error(e);
+  }
+  
+}
