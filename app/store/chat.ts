@@ -14,7 +14,7 @@ import {
   StoreKey,
   SUMMARIZE_MODEL,
 } from "../constant";
-import { ClientApi, RequestMessage } from "../client/api";
+import { ClientApi, MessageRole, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
@@ -285,11 +285,11 @@ export const useChatStore = createPersistStore(
         get().summarizeSession();
       },
 
-      addNewBotMessage(message: string, streaming?: boolean) {
+      addNewMessage(message: string, role?: MessageRole, streaming?: boolean) {
         const session = get().currentSession();
         const modelConfig = session.mask.modelConfig;
         const botMessage = createMessage({
-          role: "assistant",
+          role: role ?? "assistant",
           streaming: streaming??false,
           model: modelConfig.model,
           content: message,

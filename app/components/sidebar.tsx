@@ -16,6 +16,7 @@ import DragIcon from "../icons/drag.svg";
 import Locale from "../locales";
 
 import { useAppConfig, useChatStore } from "../store";
+import { useMaskStore } from "../store/mask";
 
 import {
   DEFAULT_SIDEBAR_WIDTH,
@@ -130,6 +131,9 @@ function useDragSideBar() {
 
 export function SideBar(props: { className?: string }) {
   const chatStore = useChatStore();
+  const maskStore = useMaskStore();
+  const masks = maskStore.getAll();
+  const mask = masks && masks.length > 0 ? masks[0] : undefined;
 
   // drag side bar
   const { onDragStart, shouldNarrow } = useDragSideBar();
@@ -205,7 +209,7 @@ export function SideBar(props: { className?: string }) {
             text={shouldNarrow ? undefined : Locale.Home.NewChat}
             onClick={() => {
               if (config.dontShowMaskSplashScreen) {
-                chatStore.newSession();
+                chatStore.newSession(mask);
                 navigate(Path.Chat);
               } else {
                 navigate(Path.NewChat);

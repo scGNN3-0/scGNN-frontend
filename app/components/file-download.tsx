@@ -80,11 +80,11 @@ export function FileDownloadModal (
         title="Job Files"
         onClose={onClose}
       >
-      {jobFiles.length === 0 ? (
+      {jobFiles === undefined || jobFiles.length === 0 ? (
         <div>No job files found</div>
       ): (
         <List>
-          {jobFiles.map((jobFile: JobFile) => (
+          { jobFiles.map((jobFile: JobFile) => (
             <ListItem
               title={jobFile.filename}
               subTitle={`size: ${formatFileSize(jobFile.filesize??0)}`}

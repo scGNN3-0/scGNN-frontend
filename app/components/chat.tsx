@@ -646,6 +646,8 @@ function _Chat() {
   const session = chatStore.currentSession();
   const config = useAppConfig();
   const fontSize = config.fontSize;
+  const maskStore = useMaskStore();
+  const masks = maskStore.getAll();
 
   const [showExport, setShowExport] = useState(false);
 
@@ -692,8 +694,9 @@ function _Chat() {
   useEffect(measure, [userInput]);
 
   // chat commands shortcuts
+  const mask = masks && masks.length > 0 ? masks[0] : undefined;
   const chatCommands = useChatCommand({
-    new: () => chatStore.newSession(),
+    new: () => chatStore.newSession(mask),
     newm: () => navigate(Path.NewChat),
     prev: () => chatStore.nextSession(-1),
     next: () => chatStore.nextSession(1),
@@ -1084,7 +1087,7 @@ function _Chat() {
     if (message.length === 0) {
       return;
     }
-    chatStore.addNewBotMessage(message);
+    chatStore.addNewMessage(message);
   }
   function onFileDownloaded(_message: string) {
     
