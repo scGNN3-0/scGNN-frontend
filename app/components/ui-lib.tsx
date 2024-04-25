@@ -490,16 +490,23 @@ export function Selector<T>(props: {
   );
 }
 
+export enum DataFileTypeEnum {
+  scRNASeq="scRNASeq",
+  CellLabels="CellLabels",
+  BulkRNASeq="BulkRNASeq",
+}
+
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 export function ReactDropZone({ accept, open, disabled, onUpload, fileTypeLabel }: {
   accept: Record<string, Array<string>>;
   open?: () => void;
   disabled?: boolean
-  onUpload: (_: File, done: () => void) => Promise<void>;
+  onUpload: (_: File, dataType: string, done: () => void) => Promise<void>;
   fileTypeLabel?: string;
 }) {
   const theFileLabel = fileTypeLabel ?? "TXT, PDF";
   const [fileToUpload, setFileToUpload] = useState<File | undefined>();
+  const [dataFileType, setDataFileType] = useState<DataFileTypeEnum>(DataFileTypeEnum.scRNASeq);
   function onFileDrop(acceptedFiles: Array<File>) {
     const file = acceptedFiles.length > 0 ? acceptedFiles[0] : undefined;
     if (file === undefined) {
@@ -514,7 +521,7 @@ export function ReactDropZone({ accept, open, disabled, onUpload, fileTypeLabel 
     if (fileToUpload === undefined) {
       return;
     }
-    await onUpload(fileToUpload, () => {
+    await onUpload(fileToUpload, dataFileType.toString(), () => {
       setFileToUpload(undefined);
     });
   }
@@ -531,20 +538,74 @@ export function ReactDropZone({ accept, open, disabled, onUpload, fileTypeLabel 
     });
 
   const files = (fileToUpload === undefined ? [] : [fileToUpload]).map((file: any) => (
-    <li key={file.path} className={styles["file-item"]}>
-      <div className={styles["file-info"]}>{file.path} - {file.size} bytes </div>
-      <div className={styles["file-warning"]}>
-        {file.size > MAX_FILE_SIZE ? (
-          <>
-            <div>File must be 50MB or smaller</div>
-            <div className={styles["warning-icon"]}><WarningIcon /></div>
-          </>
-        ) : (<div />)}
+    <li key={file.path} >
+      <div className={styles["file-item"]}>
+        <div className={styles["file-info"]}>{file.path} - {file.size} bytes </div>
+        <div className={styles["file-warning"]}>
+          {file.size > MAX_FILE_SIZE ? (
+            <>
+              <div>File must be 50MB or smaller</div>
+              <div className={styles["warning-icon"]}><WarningIcon /></div>
+            </>
+          ) : (<div />)}
+        </div>
+        <div
+          className={`${styles["file-remove-icon"]}`}
+          onClick={onRemoveFile}
+        ><CloseIcon /></div>
       </div>
-      <div
-        className={`${styles["file-remove-icon"]}`}
-        onClick={onRemoveFile}
-      ><CloseIcon /></div>
+      <div className={styles["datatype-selector"]}>Data type:
+        <div className={styles["datatype-toggle-group"]}>
+          <div className={styles["datatype-toggle-item"]} onClick={() => {
+            if (dataFileType !== DataFileTypeEnum.scRNASeq) {
+              setDataFileType(DataFileTypeEnum.scRNASeq);
+            }
+          }} >
+            <input
+              type="checkbox"
+              checked={dataFileType===DataFileTypeEnum.scRNASeq}
+              onChange={() => {
+                if (dataFileType !== DataFileTypeEnum.scRNASeq) {
+                  setDataFileType(DataFileTypeEnum.scRNASeq);
+                }
+              }}
+            />
+            <label>scRNA-Seq</label>
+          </div>
+          <div className={styles["datatype-toggle-item"]} onClick={() => {
+            if (dataFileType !== DataFileTypeEnum.CellLabels) {
+              setDataFileType(DataFileTypeEnum.CellLabels);
+            }
+          }}>
+            <input
+              type="checkbox"
+              checked={dataFileType===DataFileTypeEnum.CellLabels}
+              onChange={(e) => {
+                if (dataFileType !== DataFileTypeEnum.CellLabels) {
+                  setDataFileType(DataFileTypeEnum.CellLabels);
+                }
+              }}
+            />
+            <label>Cell Labels (Optional)</label>
+          </div>
+          <div className={styles["datatype-toggle-item"]} onClick={() => {
+            if (dataFileType !== DataFileTypeEnum.BulkRNASeq) {
+              setDataFileType(DataFileTypeEnum.BulkRNASeq);
+            }
+          }}>
+            <input
+              type="checkbox"
+              checked={dataFileType===DataFileTypeEnum.BulkRNASeq}
+              onChange={(e) => {
+                if (dataFileType !== DataFileTypeEnum.BulkRNASeq) {
+                  setDataFileType(DataFileTypeEnum.BulkRNASeq);
+                }
+              }}
+            />
+            <label>Bulk RNA-Seq (Optional)</label>
+          </div>
+        </div>
+      </div>
     </li>
   ));
 

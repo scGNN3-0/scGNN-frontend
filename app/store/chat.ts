@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 import { trimTopic } from "../utils";
-
 import Locale, { getLang } from "../locales";
 import { showToast } from "../components/ui-lib";
 import { ModelConfig, ModelType, useAppConfig } from "./config";
@@ -18,10 +18,14 @@ import { ClientApi, MessageRole, RequestMessage } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
-import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
+import { WorkflowItem, WorkflowManager } from "../workflows/workflowbase";
+import { requestJobId } from "../components/data-provider/dataaccessor";
 
 const generateUniqId = () => uuidv4();
+const workflowMgr = new WorkflowManager({
+  addNewMessage: (msg: string) => {},
+});
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -61,6 +65,7 @@ export interface ChatSession {
   clearContextIndex?: number;
 
   mask: Mask;
+  workflow: WorkflowItem;
 }
 
 export const DEFAULT_TOPIC = Locale.Store.DefaultTopic;
@@ -69,8 +74,9 @@ export const BOT_HELLO: ChatMessage = createMessage({
   content: Locale.Store.BotHello,
 });
 
-function createEmptySession(): ChatSession {
-  return {
+function createEmptySession(scGNNWorkflow?:boolean): ChatSession {
+  scGNNWorkflow = scGNNWorkflow ?? false;
+  const session: ChatSession = {
     id: generateUniqId(),
     topic: DEFAULT_TOPIC,
     memoryPrompt: "",
@@ -82,9 +88,13 @@ function createEmptySession(): ChatSession {
     },
     lastUpdate: Date.now(),
     lastSummarizeIndex: 0,
-
     mask: createEmptyMask(),
+    workflow: workflowMgr.createWorkflow(),
   };
+  if (scGNNWorkflow) {
+    session.workflow = workflowMgr.createWorkflow(session);
+  }
+  return session;
 }
 
 function getSummarizeModel(currentModel: string) {
@@ -136,7 +146,7 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
 }
 
 const DEFAULT_CHAT_STATE = {
-  sessions: [createEmptySession()],
+  sessions: [createEmptySession(true)],
   currentSessionIndex: 0,
 };
 
@@ -153,7 +163,7 @@ export const useChatStore = createPersistStore(
     const methods = {
       clearSessions() {
         set(() => ({
-          sessions: [createEmptySession()],
+          sessions: [createEmptySession(true)],
           currentSessionIndex: 0,
         }));
       },
@@ -190,7 +200,7 @@ export const useChatStore = createPersistStore(
       },
 
       newSession(mask?: Mask) {
-        const session = createEmptySession();
+        const session = createEmptySession(true);
 
         if (mask) {
           const config = useAppConfig.getState();
@@ -236,7 +246,8 @@ export const useChatStore = createPersistStore(
 
         if (deletingLastSession) {
           nextIndex = 0;
-          sessions.push(createEmptySession());
+          const session = createEmptySession(true);
+          sessions.push(session);
         }
 
         // for undo delete action
@@ -249,7 +260,7 @@ export const useChatStore = createPersistStore(
           currentSessionIndex: nextIndex,
           sessions,
         }));
-
+        
         showToast(
           Locale.Home.DeleteToast,
           {
@@ -283,6 +294,12 @@ export const useChatStore = createPersistStore(
         });
         get().updateStat(message);
         get().summarizeSession();
+      },
+
+      onFileUploaded(msg: string) {
+        get().addNewMessage(msg);
+        // get().currentSession().workflow.onFileUploaded(msg);
+        workflowMgr.onFileUploaded(get().currentSession().workflow, msg);
       },
 
       addNewMessage(message: string, role?: MessageRole, streaming?: boolean) {
@@ -336,6 +353,14 @@ export const useChatStore = createPersistStore(
             botMessage,
           ]);
         });
+
+        const {result, flowMessage} = workflowMgr.onUserMessage(session.workflow, userMessage);
+        if (result && flowMessage) {
+          botMessage.streaming = false;
+          botMessage.content = Array.isArray(flowMessage) ? flowMessage[0].content : flowMessage.content;
+          get().onNewMessage(botMessage);
+          return;
+        }
 
         var api: ClientApi;
         if (modelConfig.model.startsWith("gemini")) {
@@ -644,13 +669,20 @@ export const useChatStore = createPersistStore(
         localStorage.clear();
         location.reload();
       },
+
+      requestSessionJobId() {
+        requestJobId().then(jobId => (
+          this.updateCurrentSession((session) => (session.jobId = jobId))
+        ))
+      },
     };
 
+    workflowMgr.methods = methods;
     return methods;
   },
   {
     name: StoreKey.Chat,
-    version: 3.1,
+    version: 3.2,
     migrate(persistedState, version) {
       const state = persistedState as any;
       const newState = JSON.parse(
@@ -695,6 +727,11 @@ export const useChatStore = createPersistStore(
               config.modelConfig.enableInjectSystemPrompts;
           }
         });
+      }
+      if (version < 3.2) {
+        newState.sessions.forEach((s) => {
+          s.workflow = workflowMgr.createWorkflow();
+        })
       }
 
       return newState as any;

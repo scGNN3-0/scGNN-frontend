@@ -693,6 +693,12 @@ function _Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(measure, [userInput]);
 
+  useEffect(() => {
+    if (chatStore.currentSession().jobId === undefined) {
+      chatStore.requestSessionJobId();
+    }
+  }, [chatStore.currentSession()]);
+
   // chat commands shortcuts
   const mask = masks && masks.length > 0 ? masks[0] : undefined;
   const chatCommands = useChatCommand({
@@ -1084,10 +1090,7 @@ function _Chat() {
   const [isEditingMessage, setIsEditingMessage] = useState(false);
 
   function onFileUploaded(message: string) {
-    if (message.length === 0) {
-      return;
-    }
-    chatStore.addNewMessage(message);
+    chatStore.onFileUploaded(message);
   }
   function onFileDownloaded(_message: string) {
     

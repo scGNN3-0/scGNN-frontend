@@ -29,6 +29,7 @@ export enum ApiPath {
   File = "/api/file",
   Files = "/api/obtainJobFiles",
   Logs = "/api/logs",
+  JobId = "/api/jobId"
 }
 
 export enum SlotID {
@@ -300,6 +301,7 @@ export const scGNNPath = {
   ChatPath: "v1/chat/completions",
   JobFile: "v1/file",
   JobFiles: "v1/files",
+  JobId: "v1/chat/generate_job_id",
   Logs: "v1/logs",
   AllDocuments: "v1/rag/alldocuments",
   Document: "v1/rag/document",

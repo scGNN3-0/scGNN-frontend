@@ -25,6 +25,13 @@ export const EN_MASKS: BuiltinMask[] = [
           "You can ask the user to provide explanations and more background at any time, for instance on the treatment a patient has received, or the experimental background. But for now, wait for the user to ask a question.",
         date: "",
       },
+      {
+        id: "biomedical-researcher-assistant-4",
+        role: "assistant",
+        content:
+          "Sure, please upload the data files first.",
+        date: "",
+      },
     ],
     modelConfig: {
       model: "gpt-4",
