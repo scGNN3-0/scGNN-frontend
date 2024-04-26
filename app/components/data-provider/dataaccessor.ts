@@ -10,12 +10,14 @@ function get_json_header(): Record<string, string> {
 export const requestUploadFile = async (
   jobId: string,
   file: File,
+  dataType: string,
 ) => {
   const FILEUPLOAD = ApiPath.File;
   let uploadPath = FILEUPLOAD;
   const data = new FormData();
   data.set('file', file);
   data.set('jobId', jobId);
+  data.set("dataType", dataType);
   const res = await fetch(uploadPath, {
     method: "POST",
     body: data,
@@ -83,6 +85,17 @@ export const requestRemoveJobFile = async (
     const res = await fetch(fetchUrl, {method: "DELETE"});
   } catch (e: any) {
     console.error(e);
+  }  
+}
+
+export const requestJobId = async() => {
+  const fetchUrl = ApiPath.JobId;
+  try {
+    const res = await fetch(fetchUrl, {method: "POST"});
+    const jsonBody = await res.json();
+    const jobId = jsonBody.jobId;
+    return jobId;
+  } catch( e: any) {
+    console.error(e);
   }
-  
 }

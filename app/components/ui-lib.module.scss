@@ -434,6 +434,21 @@
     }
   }
 }
+.datatype-selector {
+  display: flex;
+
+  .datatype-toggle-group {
+    display: flex;
+    flex-direction: row;
+
+    .datatype-toggle-item {
+      margin-left: 5px;
+      margin-right: 5px;
+      display: flex;
+      flex-direction: row;
+    }
+  }
+}
 
 
 

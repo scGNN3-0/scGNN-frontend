@@ -26,6 +26,8 @@ async function request_upload_file(
   const path = scGNNPath.JobFile;
   const jobId = formData.get('jobId');
   const file = formData.get('file');
+  const dataType = formData.get('dataType') as string;
+  formData.set("data_type", dataType);
   const baseUrl = get_baseurl();
   const fetchUrl = `${baseUrl}/${path}/${jobId}`;
   const controller = new AbortController();
@@ -47,7 +49,7 @@ async function request_upload_file(
     // }
     return NextResponse.json(jsonBody);
   } finally {
-    clearTimeout(timeoutId);
+     clearTimeout(timeoutId);
   }
 }
 

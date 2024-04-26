@@ -646,6 +646,8 @@ function _Chat() {
   const session = chatStore.currentSession();
   const config = useAppConfig();
   const fontSize = config.fontSize;
+  const maskStore = useMaskStore();
+  const masks = maskStore.getAll();
 
   const [showExport, setShowExport] = useState(false);
 
@@ -691,9 +693,16 @@ function _Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(measure, [userInput]);
 
+  useEffect(() => {
+    if (chatStore.currentSession().jobId === undefined) {
+      chatStore.requestSessionJobId();
+    }
+  }, [chatStore.currentSession()]);
+
   // chat commands shortcuts
+  const mask = masks && masks.length > 0 ? masks[0] : undefined;
   const chatCommands = useChatCommand({
-    new: () => chatStore.newSession(),
+    new: () => chatStore.newSession(mask),
     newm: () => navigate(Path.NewChat),
     prev: () => chatStore.nextSession(-1),
     next: () => chatStore.nextSession(1),
@@ -1081,10 +1090,7 @@ function _Chat() {
   const [isEditingMessage, setIsEditingMessage] = useState(false);
 
   function onFileUploaded(message: string) {
-    if (message.length === 0) {
-      return;
-    }
-    chatStore.addNewBotMessage(message);
+    chatStore.onFileUploaded(message);
   }
   function onFileDownloaded(_message: string) {
     
@@ -1188,7 +1194,6 @@ function _Chat() {
         && (
           <FileDownloadModal
             onClose={() => setShowDownloadModal(false)}
-            jobId={session.jobId}
             onDownloaded={onFileDownloaded}
           />
         )}
