@@ -1194,7 +1194,6 @@ function _Chat() {
         && (
           <FileDownloadModal
             onClose={() => setShowDownloadModal(false)}
-            jobId={session.jobId}
             onDownloaded={onFileDownloaded}
           />
         )}

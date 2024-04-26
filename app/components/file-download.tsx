@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import Locale from "../locales";
+import { useChatStore } from "../store";
 import DeleteIcon from "../icons/delete.svg";
 import DownloadIcon from "../icons/download.svg";
 import { List, ListItem, Modal, showConfirm } from "./ui-lib";
@@ -28,12 +29,13 @@ function formatFileSize(bytes: number) {
 }
 
 export function FileDownloadModal (
-  { onClose, jobId, onDownloaded }: {
+  { onClose, onDownloaded }: {
     onClose: () => void,
-    jobId?: string,
     onDownloaded: (message: string) => void
   }
 ) {
+  const session = useChatStore().currentSession();
+  const jobId = session.jobId !== undefined ? (`${session.jobId}`) : undefined;
   const [jobFiles, setJobFiles] = useState<Array<JobFile>>([]);
   async function onDownload(filename: string) {
     try {
