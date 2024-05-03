@@ -26,6 +26,7 @@ import {
 } from "react-router-dom";
 import { SideBar } from "./sidebar";
 import { useAppConfig } from "../store/config";
+import { useChatStore } from "../store/chat"
 import { AuthPage } from "./auth";
 import { RightLogsPanel } from "./right-logspanel";
 import { getClientConfig } from "../config/client";
@@ -194,6 +195,7 @@ export function Home({user}: {user: string | null}) {
   useLoadData();
   useHtmlLang();
 
+  useChatStore().runIdleJob();
   useEffect(() => {
     console.log("[Config] got config from build time", getClientConfig());
     useAccessStore.getState().fetch();

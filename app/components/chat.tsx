@@ -832,8 +832,15 @@ function _Chat() {
 
   const deleteMessage = (msgId?: string) => {
     chatStore.updateCurrentSession(
-      (session) =>
-        (session.messages = session.messages.filter((m) => m.id !== msgId)),
+      (session) => {
+        if (!msgId) {
+          const msg = session.messages.find((m) => (m.id === msgId));
+          if (msg && msg.taskId && msg.taskId.length > 0 && session.taskIds[msg.taskId] !== undefined) {
+            delete session.taskIds[msg.taskId];
+          }
+        }
+        (session.messages = session.messages.filter((m) => m.id !== msgId))
+      },
     );
   };
 
