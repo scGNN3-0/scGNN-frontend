@@ -20,12 +20,16 @@ import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { createPersistStore } from "../utils/store";
 import { WorkflowItem, WorkflowManager } from "../workflows/workflowbase";
-import { requestJobId } from "../components/data-provider/dataaccessor";
+import { requestJobId, requestTaskResults } from "../components/data-provider/dataaccessor";
+import { Session } from "inspector";
+import { isImageFile } from "../utils/file";
 
 const generateUniqId = () => uuidv4();
 const workflowMgr = new WorkflowManager({
   addNewMessage: (msg: string) => {},
 });
+
+const IDLE_INTERVAL = 10 * 1000; // 10s
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -66,6 +70,7 @@ export interface ChatSession {
 
   mask: Mask;
   workflow: WorkflowItem;
+  taskIds: Record<string, any>;
 }
 
 export const DEFAULT_TOPIC = Locale.Store.DefaultTopic;
@@ -90,6 +95,7 @@ function createEmptySession(scGNNWorkflow?:boolean): ChatSession {
     lastSummarizeIndex: 0,
     mask: createEmptyMask(),
     workflow: workflowMgr.createWorkflow(),
+    taskIds: {},
   };
   if (scGNNWorkflow) {
     session.workflow = workflowMgr.createWorkflow(session);
@@ -150,6 +156,8 @@ const DEFAULT_CHAT_STATE = {
   currentSessionIndex: 0,
 };
 
+let intervalId: any = 0;
+
 export const useChatStore = createPersistStore(
   DEFAULT_CHAT_STATE,
   (set, _get) => {
@@ -160,7 +168,61 @@ export const useChatStore = createPersistStore(
       };
     }
 
+    function processTaskResult(taskId: string, result: Array<string>) {
+      if (result.length === 0) {
+        return;
+      }
+      result.forEach((r: string) => {
+        if (isImageFile(r) && taskId in get().currentSession().taskIds) {
+          // get().addNewMessage(`${r} <br /> ![result image](/api/task/results/image/${taskId}/${r})`, "assistant", false);
+          get().addNewMessage(`task ${taskId} result: ${r} <br /> <img src="/api/task/results/image/${taskId}/${r}" alt="Result Image" width="400" />`, 
+            "assistant", false
+          );
+        }
+      });
+    }
+    function checkTasksResult() {
+      const curSession = get().currentSession();
+      if (!curSession.taskIds) {
+        return;
+      }
+      const taskIds = curSession.taskIds;
+      Object.keys(curSession.taskIds).forEach((taskId: string) => {
+        taskId = taskId.trim();
+        if (taskId.length === 0 || taskIds[taskId] === undefined ) {
+          // invalid
+          return;
+        }
+        if (taskIds[taskId] !== null) {
+          // Result for this task has been requested
+          return;
+        }
+        requestTaskResults(taskId).then((res: any) => {
+          if (!res.results || res.results.length === 0) {
+            return;
+          }
+          if (curSession !== get().currentSession()) {
+            return;
+          }
+          get().updateCurrentSession((theSession: ChatSession) => {
+            if (!theSession.taskIds || theSession.taskIds[taskId] === undefined) {
+              return;
+            }
+            theSession.taskIds[taskId] = res.results;
+          });
+          processTaskResult(taskId, res.results);
+        }).catch((err: any) => (console.error(err)));
+      });
+    }
+    function idleJobs() {
+      checkTasksResult();
+    }
     const methods = {
+      runIdleJob() {   
+        if (intervalId === 0) {
+          intervalId = setInterval(idleJobs, IDLE_INTERVAL);
+        }
+      },
       clearSessions() {
         set(() => ({
           sessions: [createEmptySession(true)],
@@ -388,6 +450,15 @@ export const useChatStore = createPersistStore(
             if (message) {
               botMessage.content = message;
               get().onNewMessage(botMessage);
+            }
+            if (taskId !== undefined && taskId.length > 0) {
+              get().updateCurrentSession((session) => {
+                if (!session.taskIds) {
+                  session.taskIds = {[taskId]: null}
+                } else {
+                  session.taskIds[taskId] = null
+                }
+              });
             }
             ChatControllerPool.remove(session.id, botMessage.id);
           },
@@ -682,7 +753,7 @@ export const useChatStore = createPersistStore(
   },
   {
     name: StoreKey.Chat,
-    version: 3.2,
+    version: 3.3,
     migrate(persistedState, version) {
       const state = persistedState as any;
       const newState = JSON.parse(
@@ -730,7 +801,17 @@ export const useChatStore = createPersistStore(
       }
       if (version < 3.2) {
         newState.sessions.forEach((s) => {
+          if (s.workflow) {
+            return;
+          }
           s.workflow = workflowMgr.createWorkflow();
+        })
+      }
+      if (version < 3.3) {
+        newState.sessions.forEach((s) => {
+          if (!s.taskIds) {
+            s.taskIds = {};
+          }
         })
       }
 

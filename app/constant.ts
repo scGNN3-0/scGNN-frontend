@@ -28,7 +28,8 @@ export enum ApiPath {
   OpenAI = "/api/openai",
   File = "/api/file",
   Files = "/api/obtainJobFiles",
-  Logs = "/api/logs",
+  Logs = "/api/task/logs",
+  ObtainResults = "/api/task/obtainResults",
   JobId = "/api/jobId"
 }
 
@@ -303,8 +304,8 @@ export const scGNNPath = {
   JobFiles: "v1/files",
   JobId: "v1/chat/generate_job_id",
   Logs: "v1/logs",
+  ObtainResults: "v1/obtain_results",
+  ResultImage: "v1/result_image",
   AllDocuments: "v1/rag/alldocuments",
   Document: "v1/rag/document",
-  RAGConnectionStatus: "v1/rag/connectionstatus",
-  KGConnectionStatus: "v1/kg/connectionstatus",
 }

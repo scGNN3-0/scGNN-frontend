@@ -99,3 +99,20 @@ export const requestJobId = async() => {
     console.error(e);
   }
 }
+
+export const requestTaskResults = async (taskId: string) => {
+  const RESULTS = ApiPath.ObtainResults;
+  let fetchPath = RESULTS as string;
+  if (!fetchPath.endsWith("/")) {
+    fetchPath += "/";
+  }
+  fetchPath += taskId;
+  const response = await fetch (fetchPath, {
+    method: "POST",
+  });
+  if (response.ok) {
+    const jsonObj = await response.json();
+    return jsonObj;
+  }
+  return {results: []};
+};
