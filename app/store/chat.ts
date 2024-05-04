@@ -175,7 +175,7 @@ export const useChatStore = createPersistStore(
       result.forEach((r: string) => {
         if (isImageFile(r) && taskId in get().currentSession().taskIds) {
           // get().addNewMessage(`${r} <br /> ![result image](/api/task/results/image/${taskId}/${r})`, "assistant", false);
-          get().addNewMessage(`${r} <br /> <img src="/api/task/results/image/${taskId}/${r}" alt="Result Image" width="100" />`, 
+          get().addNewMessage(`task ${taskId} result: ${r} <br /> <img src="/api/task/results/image/${taskId}/${r}" alt="Result Image" width="400" />`, 
             "assistant", false
           );
         }
