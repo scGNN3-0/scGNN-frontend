@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSideConfig } from "@/app/config/server";
 import { ERROR_OK, LOCAL_BASE_URL, scGNNPath } from "@/app/constant";
-import { SCGNNServerResponse } from "../common";
 import { prettyObject } from "@/app/utils/format";
 
 const serverConfig = getServerSideConfig();
