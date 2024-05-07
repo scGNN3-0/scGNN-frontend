@@ -20,7 +20,7 @@ async function requestTaskResults(
   if (baseUrl.endsWith("/")) {
     baseUrl = baseUrl.slice(0, -1);
   }
-  const path = scGNNPath.ObtainResults;
+  const path = scGNNPath.QueryResults;
   const fetchUrl = `${baseUrl}/${path}/${taskId}`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {

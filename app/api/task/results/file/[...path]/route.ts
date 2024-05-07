@@ -46,7 +46,7 @@ async function requestTaskResultFile(
   }
 }
 
-async function handle(_request: NextRequest, { params }: { params: {path: any} }) {
+export async function handleGetFile(_request: NextRequest, { params }: { params: {path: any} }) {
   try {
     const taskId = params.path[0];
     const filename = params.path[1];
@@ -59,4 +59,4 @@ async function handle(_request: NextRequest, { params }: { params: {path: any} }
   }
 }
 
-export const GET = handle;
+export const GET = handleGetFile;

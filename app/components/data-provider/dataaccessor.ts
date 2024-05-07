@@ -41,7 +41,7 @@ export const requestLogs = async (
 }
 
 export const requestJobFiles = async (jobId: string) => {
-  const FILEURL = ApiPath.Files + '/' + jobId;
+  const FILEURL = ApiPath.JobFiles + '/' + jobId;
   try {
     const res = await fetch(FILEURL, {
       method: "POST",      
