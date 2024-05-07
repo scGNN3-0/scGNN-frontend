@@ -26,11 +26,13 @@ export enum Path {
 export enum ApiPath {
   Cors = "/api/cors",
   OpenAI = "/api/openai",
-  File = "/api/file",
-  Files = "/api/obtainJobFiles",
+  JobFile = "/api/job/file",
+  TaskResultFile= "/api/task/results/file",
+  TaskResultImage = "/api/task/results/image",
+  JobFiles = "/api/job/files",
   Logs = "/api/task/logs",
   ObtainResults = "/api/task/obtainResults",
-  JobId = "/api/jobId"
+  JobId = "/api/job/id"
 }
 
 export enum SlotID {
@@ -304,8 +306,9 @@ export const scGNNPath = {
   JobFiles: "v1/files",
   JobId: "v1/chat/generate_job_id",
   Logs: "v1/logs",
-  ObtainResults: "v1/obtain_results",
+  QueryResults: "v1/query_results",
   ResultImage: "v1/result_image",
+  ResultFile: "v1/result_file",
   AllDocuments: "v1/rag/alldocuments",
   Document: "v1/rag/document",
 }
