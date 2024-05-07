@@ -26,7 +26,9 @@ export enum Path {
 export enum ApiPath {
   Cors = "/api/cors",
   OpenAI = "/api/openai",
-  File = "/api/file",
+  JobFile = "/api/job/file",
+  TaskResultFile= "/api/task/results/file",
+  TaskResultImage = "/api/task/results/image",
   Files = "/api/obtainJobFiles",
   Logs = "/api/task/logs",
   ObtainResults = "/api/task/obtainResults",
@@ -306,6 +308,7 @@ export const scGNNPath = {
   Logs: "v1/logs",
   ObtainResults: "v1/obtain_results",
   ResultImage: "v1/result_image",
+  ResultFile: "v1/result_file",
   AllDocuments: "v1/rag/alldocuments",
   Document: "v1/rag/document",
 }

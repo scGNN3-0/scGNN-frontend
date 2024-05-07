@@ -12,7 +12,7 @@ export const requestUploadFile = async (
   file: File,
   dataType: string,
 ) => {
-  const FILEUPLOAD = ApiPath.File;
+  const FILEUPLOAD = ApiPath.JobFile;
   let uploadPath = FILEUPLOAD;
   const data = new FormData();
   data.set('file', file);
@@ -55,7 +55,7 @@ export const requestJobFiles = async (jobId: string) => {
 export const requestDownloadJobFile = async (
   jobId: string, filename: string
 ) => {
-  const fetchUrl = ApiPath.File + '?' + new URLSearchParams({
+  const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
   });
@@ -74,10 +74,29 @@ export const requestDownloadJobFile = async (
   }
 }
 
+export const requestDownloadTaskResultFile = async (
+  taskId: string, filename: string
+) => {
+  const fetchUrl = `${ApiPath.TaskResultFile}/${taskId}/${filename}`;
+  try {
+    const res = await fetch(fetchUrl, {method: "GET"});
+    const data = await res.blob();
+    const url = window.URL.createObjectURL(new Blob([data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (e: any) {
+    console.error(e);
+  }
+};
+
 export const requestRemoveJobFile = async (
   jobId: string, filename: string
 ) => {
-  const fetchUrl = ApiPath.File + '?' + new URLSearchParams({
+  const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
   });
