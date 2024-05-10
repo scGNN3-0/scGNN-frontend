@@ -29,8 +29,6 @@ const workflowMgr = new WorkflowManager({
   addNewMessage: (msg: string) => {},
 });
 
-const IDLE_INTERVAL = 10 * 1000; // 10s
-
 export type ChatMessage = RequestMessage & {
   date: string;
   streaming?: boolean;
@@ -156,7 +154,7 @@ const DEFAULT_CHAT_STATE = {
   currentSessionIndex: 0,
 };
 
-let intervalId: any = 0;
+// let intervalId: any = 0;
 
 export const useChatStore = createPersistStore(
   DEFAULT_CHAT_STATE,
@@ -214,14 +212,15 @@ export const useChatStore = createPersistStore(
         }).catch((err: any) => (console.error(err)));
       });
     }
-    function idleJobs() {
-      checkTasksResult();
-    }
+    
     const methods = {
-      runIdleJob() {   
-        if (intervalId === 0) {
-          intervalId = setInterval(idleJobs, IDLE_INTERVAL);
-        }
+      // runIdleJob() {   
+      //  if (intervalId === 0) {
+      //    intervalId = setInterval(idleJobs, IDLE_INTERVAL);
+      //  }
+      // },
+      idleJobs() {
+        checkTasksResult();
       },
       clearSessions() {
         set(() => ({

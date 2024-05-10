@@ -51,6 +51,7 @@ import {
   DEFAULT_TOPIC,
   ModelType,
   ChatSession,
+  useTaskListStore,
 } from "../store";
 
 import {
@@ -642,6 +643,7 @@ function _Chat() {
   type RenderMessage = ChatMessage & { preview?: boolean };
 
   const chatStore = useChatStore();
+  const taskListStore = useTaskListStore();
   const logsStore = useLogsStore();
   const session = chatStore.currentSession();
   const config = useAppConfig();
@@ -831,11 +833,12 @@ function _Chat() {
   };
 
   const deleteMessage = (msgId?: string) => {
+    const msg = chatStore.currentSession().messages.find((m) => (m.id === msgId));
     chatStore.updateCurrentSession(
       (session) => {
-        if (!msgId) {
-          const msg = session.messages.find((m) => (m.id === msgId));
+        if (msgId) {
           if (msg && msg.taskId && msg.taskId.length > 0 && session.taskIds[msg.taskId] !== undefined) {
+            // session.taskIds = session.taskIds.filter((id: any) => (id !== msg.taskId))
             delete session.taskIds[msg.taskId];
           }
         }

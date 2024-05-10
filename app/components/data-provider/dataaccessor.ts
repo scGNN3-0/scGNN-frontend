@@ -35,7 +35,7 @@ export const requestLogs = async (
   }
   fetchPath += taskId;
   const response = await fetch(fetchPath, {
-    method: "GET",
+    method: "POST",
   });
   return response;
 }
@@ -126,6 +126,23 @@ export const requestTaskResults = async (taskId: string) => {
     fetchPath += "/";
   }
   fetchPath += taskId;
+  const response = await fetch (fetchPath, {
+    method: "POST",
+  });
+  if (response.ok) {
+    const jsonObj = await response.json();
+    return jsonObj;
+  }
+  return {results: []};
+};
+
+export const requestJobTasksStatus = async (jobId: string) => {
+  const JOBTASKSSTATUS = ApiPath.ObtainStatus;
+  let fetchPath = JOBTASKSSTATUS as string;
+  if (!fetchPath.endsWith("/")) {
+    fetchPath += "/";
+  }
+  fetchPath += jobId;
   const response = await fetch (fetchPath, {
     method: "POST",
   });
