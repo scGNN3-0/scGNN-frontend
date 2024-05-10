@@ -26,9 +26,10 @@ import {
 } from "react-router-dom";
 import { SideBar } from "./sidebar";
 import { useAppConfig } from "../store/config";
-import { useChatStore } from "../store/chat"
+import { useChatStore } from "../store/chat";
+import { useTaskListStore } from "../store/tasklist";
 import { AuthPage } from "./auth";
-import { RightLogsPanel } from "./right-logspanel";
+import { RightPanel } from "./right-panel";
 import { getClientConfig } from "../config/client";
 import { ClientApi } from "../client/api";
 import { useAccessStore } from "../store";
@@ -165,7 +166,7 @@ function Screen({user}: {user: string | null}) {
             </Routes>
           </div>
 
-          <RightLogsPanel className={isHome ? styles["right-sidebar-show"] : ""} />
+          <RightPanel className={isHome ? styles["right-sidebar-show"] : ""} />
         </>
       )}
     </div>
@@ -190,15 +191,34 @@ export function useLoadData() {
   }, []);
 }
 
+let gIntervalId: any = 0;
+const IDLE_INTERVAL = 10 * 1000; // 10s
+function runIdleJob(idleJobs: () => void) {   
+  if (gIntervalId === 0) {
+    gIntervalId = setInterval(idleJobs, IDLE_INTERVAL);
+  }
+}
+
 export function Home({user}: {user: string | null}) {
   useSwitchTheme();
   useLoadData();
   useHtmlLang();
 
-  useChatStore().runIdleJob();
+//  const chatIdleJobsCb = useChatStore().idleJobs;
+//  const taskListIdleJobsCb = useTaskListStore().idleJobs;
+
+  function idleJobs() {
+    useChatStore.getState().idleJobs();
+    useTaskListStore.getState().idleJobs();
+    // chatIdleJobsCb();
+    // taskListIdleJobsCb();
+  }
+
   useEffect(() => {
     console.log("[Config] got config from build time", getClientConfig());
     useAccessStore.getState().fetch();
+
+    runIdleJob(idleJobs);
   }, []);
 
   if (!useHasHydrated()) {

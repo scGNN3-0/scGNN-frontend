@@ -32,6 +32,7 @@ export enum ApiPath {
   JobFiles = "/api/job/files",
   Logs = "/api/task/logs",
   ObtainResults = "/api/task/obtainResults",
+  ObtainStatus = "/api/job/tasksStatus",
   JobId = "/api/job/id"
 }
 
@@ -54,6 +55,7 @@ export enum StoreKey {
   Update = "chat-update",
   Sync = "sync",
   Logs = "logs",
+  TaskList = "task-list",
 }
 
 export const DEFAULT_SIDEBAR_WIDTH = 300;
@@ -304,8 +306,9 @@ export const scGNNPath = {
   ChatPath: "v1/chat/completions",
   JobFile: "v1/file",
   JobFiles: "v1/files",
+  JobTasksStatus: "v1/query_status",
   JobId: "v1/chat/generate_job_id",
-  Logs: "v1/logs",
+  Logs: "v1/query_logs",
   QueryResults: "v1/query_results",
   ResultImage: "v1/result_image",
   ResultFile: "v1/result_file",
