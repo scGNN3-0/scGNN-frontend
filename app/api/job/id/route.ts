@@ -26,7 +26,8 @@ async function handlePost(request: NextRequest) {
   try {
     const res = await fetch(fetchUrl, {method: "POST"});
     const jsonBody = await res.json();
-    return NextResponse.json({jobId: jsonBody.job_id});
+    const example_mode = jsonBody.example_mode ?? false;
+    return NextResponse.json({jobId: jsonBody.job_id, example_mode});
   } catch (e: any) {
     console.error(e);
     return NextResponse.json(prettyObject(e));

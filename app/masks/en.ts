@@ -46,5 +46,36 @@ export const EN_MASKS: BuiltinMask[] = [
     lang: "en",
     builtin: true,
     createdAt: 1697222692762,
+  }, {
+    avatar: "1f977",
+    name: "scGNN helper",
+    context: [
+      {
+        id: "scgnn-helper-1",
+        role: "system",
+        content: "This is the demo to show how to use scGNN server",
+        date: "",
+      },
+      {
+        id: "scgnn-helper-2",
+        role: "assistant",
+        content:
+          "To begin, please upload the sample data file \"data_example.h5ad\" first.\nYou can click \"upload file\" button located above message input to upload file.",
+        date: "",
+      },
+    ],
+    modelConfig: {
+      model: "gpt-4",
+      temperature: 0.7,
+      max_tokens: 2000,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+      sendMemory: true,
+      historyMessageCount: 4,
+      compressMessageLengthThreshold: 2000,
+    },
+    lang: "en",
+    builtin: true,
+    createdAt: 1697222692762,
   },
 ];

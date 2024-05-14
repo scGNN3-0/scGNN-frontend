@@ -1,7 +1,7 @@
 import Locale from "../locales";
 import { DataFileTypeEnum, Modal, ReactDropZone } from "./ui-lib";
 import styles from "./file-upload.module.scss";
-import { requestUploadFile } from "./data-provider/dataaccessor";
+import { useChatStore } from "../store";
 
 export function FileUploadModal(
   {onClose, jobId, onUploaded}: 
@@ -11,9 +11,10 @@ export function FileUploadModal(
     onUploaded: (message: string) => void
   }
 ) {
+  const chatState = useChatStore.getState();
   async function onUpload(file: File, dataType: string, done: () => void) {
     try {
-      const res = await requestUploadFile(jobId??"", file, dataType);
+      const res = await chatState.requestUploadFile(file, dataType);
       const jsonBody = await res.json();
       onUploaded(jsonBody.message??"");
     } catch (e: any) {
