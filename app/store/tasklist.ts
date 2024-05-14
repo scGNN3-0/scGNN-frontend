@@ -2,7 +2,6 @@ import { createPersistStore } from "../utils/store";
 import { StoreKey } from "../constant";
 
 import { useChatStore } from "./chat";
-import { requestJobTasksStatus } from "../components/data-provider/dataaccessor";
 
 export interface TaskData {
   taskId: string;
@@ -24,17 +23,21 @@ export const DEFAULT_TASKLIST_STATE = {
 }
 export type TaskListState = typeof DEFAULT_TASKLIST_STATE;
 
-
+const is_demo_mode = (mask_name: string): boolean => {
+  return mask_name === "scGNN helper";
+}
 export const useTaskListStore = createPersistStore(
   { ...DEFAULT_TASKLIST_STATE },
   (set, get) => {
 
     function getJobTasksStatus() {
-      const jobId = useChatStore.getState().currentSession().jobId;
+      const chatStore = useChatStore.getState();
+      const session = chatStore.currentSession();
+      const jobId = session.jobId;
       if (jobId === undefined) {
         return;
       }
-      requestJobTasksStatus(jobId).then((res: any) => {
+      chatStore.requestJobTasksStatus().then((res: any) => {
         if (!res.results) {
           return;
         }

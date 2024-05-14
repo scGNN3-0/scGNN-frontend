@@ -11,6 +11,7 @@ export const requestUploadFile = async (
   jobId: string,
   file: File,
   dataType: string,
+  demoMode: boolean
 ) => {
   const FILEUPLOAD = ApiPath.JobFile;
   let uploadPath = FILEUPLOAD;
@@ -18,6 +19,7 @@ export const requestUploadFile = async (
   data.set('file', file);
   data.set('jobId', jobId);
   data.set("dataType", dataType);
+  data.set("example_mode", demoMode.toString())
   const res = await fetch(uploadPath, {
     method: "POST",
     body: data,
@@ -26,7 +28,7 @@ export const requestUploadFile = async (
 }
 
 export const requestLogs = async (
-  taskId: string
+  taskId: string, demoMode: boolean
 ) => {
   const LOGS = ApiPath.Logs;
   let fetchPath = LOGS as string;
@@ -36,15 +38,23 @@ export const requestLogs = async (
   fetchPath += taskId;
   const response = await fetch(fetchPath, {
     method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({example_mode: demoMode})
   });
   return response;
 }
 
-export const requestJobFiles = async (jobId: string) => {
+export const requestJobFiles = async (jobId: string, demoMode: boolean) => {
   const FILEURL = ApiPath.JobFiles + '/' + jobId;
   try {
     const res = await fetch(FILEURL, {
-      method: "POST",      
+      method: "POST",     
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({example_mode: demoMode}) 
     })
     return res;
   } catch (e: any) {
@@ -53,11 +63,12 @@ export const requestJobFiles = async (jobId: string) => {
 }
 
 export const requestDownloadJobFile = async (
-  jobId: string, filename: string
+  jobId: string, filename: string, demoMode: boolean
 ) => {
   const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
+    example_mode: demoMode.toString(),
   });
   try {
     const res = await fetch(fetchUrl, {method: "GET"});
@@ -75,9 +86,9 @@ export const requestDownloadJobFile = async (
 }
 
 export const requestDownloadTaskResultFile = async (
-  taskId: string, filename: string
+  taskId: string, filename: string, demoMode: boolean
 ) => {
-  const fetchUrl = `${ApiPath.TaskResultFile}/${taskId}/${filename}`;
+  const fetchUrl = `${ApiPath.TaskResultFile}/${taskId}/${filename}?example_mode=${demoMode}`;
   try {
     const res = await fetch(fetchUrl, {method: "GET"});
     const data = await res.blob();
@@ -94,23 +105,35 @@ export const requestDownloadTaskResultFile = async (
 };
 
 export const requestRemoveJobFile = async (
-  jobId: string, filename: string
+  jobId: string, filename: string, demoMode: boolean
 ) => {
   const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
   });
   try {
-    const res = await fetch(fetchUrl, {method: "DELETE"});
+    const res = await fetch(fetchUrl, {
+      method: "DELETE", 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({example_mode: demoMode})
+    });
   } catch (e: any) {
     console.error(e);
   }  
 }
 
-export const requestJobId = async() => {
+export const requestJobId = async(demoMode: boolean) => {
   const fetchUrl = ApiPath.JobId;
   try {
-    const res = await fetch(fetchUrl, {method: "POST"});
+    const res = await fetch(fetchUrl, {
+      method: "POST", 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({example_mode: demoMode})
+    });
     const jsonBody = await res.json();
     const jobId = jsonBody.jobId;
     return jobId;
@@ -119,7 +142,7 @@ export const requestJobId = async() => {
   }
 }
 
-export const requestTaskResults = async (taskId: string) => {
+export const requestTaskResults = async (taskId: string, demoMode: boolean) => {
   const RESULTS = ApiPath.ObtainResults;
   let fetchPath = RESULTS as string;
   if (!fetchPath.endsWith("/")) {
@@ -128,6 +151,10 @@ export const requestTaskResults = async (taskId: string) => {
   fetchPath += taskId;
   const response = await fetch (fetchPath, {
     method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({example_mode: demoMode})
   });
   if (response.ok) {
     const jsonObj = await response.json();
@@ -136,7 +163,7 @@ export const requestTaskResults = async (taskId: string) => {
   return {results: []};
 };
 
-export const requestJobTasksStatus = async (jobId: string) => {
+export const requestJobTasksStatus = async (jobId: string, demoMode: boolean) => {
   const JOBTASKSSTATUS = ApiPath.ObtainStatus;
   let fetchPath = JOBTASKSSTATUS as string;
   if (!fetchPath.endsWith("/")) {
@@ -145,6 +172,10 @@ export const requestJobTasksStatus = async (jobId: string) => {
   fetchPath += jobId;
   const response = await fetch (fetchPath, {
     method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({example_mode: demoMode})
   });
   if (response.ok) {
     const jsonObj = await response.json();

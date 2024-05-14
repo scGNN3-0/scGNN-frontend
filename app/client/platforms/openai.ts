@@ -108,6 +108,7 @@ export class ChatGPTApi implements LLMApi {
       job_id: theJobId,
       is_start: isStart,
       user_input: userInput,
+      example_mode: options.demoMode ?? false,
     };
 
     console.log("[Request] openai payload: ", requestPayload);

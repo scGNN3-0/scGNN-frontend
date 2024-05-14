@@ -29,6 +29,7 @@ import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
 import UploadIcon from "../icons/file-upload.svg";
 import DownloadIcon from "../icons/file-download.svg";
+import FileManagerIcon from "../icons/file-manager.svg"
 
 import LightIcon from "../icons/light.svg";
 import DarkIcon from "../icons/dark.svg";
@@ -96,7 +97,6 @@ import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
 import { FileUploadModal } from "./file-upload";
-import { requestLogs } from "./data-provider/dataaccessor";
 import { FileDownloadModal } from "./file-download";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
@@ -429,7 +429,7 @@ export function ChatActions(props: {
   const config = useAppConfig();
   const navigate = useNavigate();
   const chatStore = useChatStore();
-
+  
   // switch themes
   const theme = config.theme;
   function nextTheme() {
@@ -570,8 +570,8 @@ export function ChatActions(props: {
       {(props.session.jobId !== undefined) 
       && (<ChatAction
         onClick={props.showFileDownloadModal}
-        text="download file"
-        icon={<DownloadIcon />}
+        text="file manager"
+        icon={<FileManagerIcon />}
       />)}
     </div>
   );
@@ -923,7 +923,7 @@ function _Chat() {
       return;
     }
     try {
-      const response = await requestLogs(taskId);
+      const response = await chatStore.requestLogs(taskId);
       const jsonBody = await response.json();
       if (jsonBody.log) {
         logsStore.setLogs(taskId, jsonBody.log);
