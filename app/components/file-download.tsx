@@ -9,12 +9,6 @@ import TasksIcon from "../icons/tasks.svg";
 import { List, ListItem, Modal, showConfirm } from "./ui-lib";
 import styles from "./file-download.module.scss"
 import { IconButton } from "./button";
-import { 
-  requestDownloadJobFile, 
-  requestDownloadTaskResultFile, 
-  requestJobFiles, 
-  requestRemoveJobFile 
-} from "./data-provider/dataaccessor";
 
 interface JobFile {
   filename: string;
@@ -37,12 +31,13 @@ export function FileDownloadModal (
     onDownloaded: (message: string) => void
   }
 ) {
+  const chatStore = useChatStore();
   const session = useChatStore().currentSession();
   const jobId = session.jobId !== undefined ? (`${session.jobId}`) : undefined;
   const [jobFiles, setJobFiles] = useState<Array<JobFile>>([]);
   async function onDownload(filename: string) {
     try {
-      await requestDownloadJobFile(jobId??"", filename);
+      await chatStore.requestDownloadJobFile(filename);
     } catch (e: any) {
       console.error(e);
     }
@@ -51,7 +46,7 @@ export function FileDownloadModal (
     taskId: string, filename: string
   ) {
     try {
-      await requestDownloadTaskResultFile(taskId, filename);
+      await chatStore.requestDownloadTaskResultFile(taskId, filename);
     } catch(e: any) {
       console.error(e);
     }
@@ -65,7 +60,7 @@ export function FileDownloadModal (
       return;
     }
     try {
-      await requestRemoveJobFile(jobId??"", filename);
+      await chatStore.requestRemoveJobFile(filename);
       await updateJobFiles();
     } catch (e: any) {
       console.error(e);
@@ -74,7 +69,7 @@ export function FileDownloadModal (
 
   async function updateJobFiles() {
     if (jobId && jobId.length > 0) {
-      const res = await requestJobFiles(jobId);
+      const res = await chatStore.requestJobFiles();
       try {
         const {job_files: files} = await res?.json();
         setJobFiles(files as Array<JobFile>);

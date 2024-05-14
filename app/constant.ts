@@ -14,6 +14,8 @@ export const LOCAL_BASE_URL = "http://localhost:5001"
 
 export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/";
 
+export const SCGNN_SUBPATH = "scgnn";
+
 export enum Path {
   Home = "/",
   Chat = "/chat",
