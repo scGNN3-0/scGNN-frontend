@@ -447,7 +447,7 @@ export const useChatStore = createPersistStore(
             botMessage.streaming = false;
             botMessage.taskId = taskId;
             if (message) {
-              botMessage.content = message;
+              botMessage.content = taskId !== undefined && taskId.length > 0? `task id: ${taskId}\n` + message : message;
               get().onNewMessage(botMessage);
             }
             if (taskId !== undefined && taskId.length > 0) {

@@ -41,6 +41,7 @@ class WorkflowItemHandler {
   } {
     return { result: false };
   }
+  onBotMessageFinished(message: string, taskId?: string) {}
 }
 
 class scGNNWorkflowItemHandler extends WorkflowItemHandler {
@@ -95,6 +96,17 @@ class scGNNWorkflowExampleItemHandler extends WorkflowItemHandler {
   onUserMessage(wfi: WorkflowItem, message: ChatMessage): { result: boolean; flowMessage?: [{ role: string; content: string; }] | { role: string; content: string; } | undefined; } {
     return {result: false};
   }
+  onBotMessageFinished(message: string, taskId?: string | undefined): void {
+    if (taskId === undefined  || taskId.length === 0) {
+      return
+    }
+    setTimeout(() => {
+      this.methods.addNewMessage(`Task ${taskId} has been submitted. After it is done, you can input\
+       "I want to draw a headtmap figure by using this task ${taskId} result files" to show result image. \n\nOr \
+        input "I want to change a colormap to Reds and draw this heatmap figure by using this task ${taskId} result files."`);
+    }, 2000);
+  }
+  
 }
 
 enum scGNNWorkflowStepEnum {
@@ -170,7 +182,11 @@ export class WorkflowManager {
       messages,
       config,
       onUpdate,
-      onFinish,
+      onFinish: (message: string, taskId?: string) => {
+        onFinish(message, taskId);
+
+        this.handlers[session.workflow.type].onBotMessageFinished(message, taskId);
+      },
       onError,
       onController,
       demoMode: is_demo_mode(session.mask.name)
