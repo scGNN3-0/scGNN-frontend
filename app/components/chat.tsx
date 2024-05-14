@@ -96,7 +96,6 @@ import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
 import { FileUploadModal } from "./file-upload";
-import { requestLogs } from "./data-provider/dataaccessor";
 import { FileDownloadModal } from "./file-download";
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
@@ -923,7 +922,7 @@ function _Chat() {
       return;
     }
     try {
-      const response = await requestLogs(taskId);
+      const response = await chatStore.requestLogs(taskId);
       const jsonBody = await response.json();
       if (jsonBody.log) {
         logsStore.setLogs(taskId, jsonBody.log);

@@ -45,6 +45,7 @@ const DEFAULT_ACCESS_STATE = {
   disableGPT4: false,
   disableFastLink: false,
   customModels: "",
+  subPath: "",
 };
 
 export const useAccessStore = createPersistStore(
@@ -84,7 +85,7 @@ export const useAccessStore = createPersistStore(
       if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;
       fetchState = 1;
       const url = getFetchUrl(subPath??"", "/api/config");
-      fetch("/api/config", {
+      fetch(url, {
         method: "post",
         body: null,
         headers: {

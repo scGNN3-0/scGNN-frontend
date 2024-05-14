@@ -19,15 +19,17 @@ import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { createPersistStore } from "../utils/store";
-import { WorkflowItem, WorkflowManager } from "../workflows/workflowbase";
-import { requestJobId, requestTaskResults } from "../components/data-provider/dataaccessor";
+import { WorkflowItem, WorkflowItemTypeEnum, WorkflowManager } from "../workflows/workflowbase";
+import { requestJobId, requestTaskResults, requestUploadFile } from "../components/data-provider/dataaccessor";
 import { Session } from "inspector";
 import { isImageFile } from "../utils/file";
 
 const generateUniqId = () => uuidv4();
 const workflowMgr = new WorkflowManager({
-  addNewMessage: (msg: string) => {},
+  addNewMessage: (msg: string, role?: MessageRole, streaming?: boolean) => {},
 });
+
+export const getWorkflowManager = () => (workflowMgr);
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -77,8 +79,9 @@ export const BOT_HELLO: ChatMessage = createMessage({
   content: Locale.Store.BotHello,
 });
 
-function createEmptySession(scGNNWorkflow?:boolean): ChatSession {
-  scGNNWorkflow = scGNNWorkflow ?? false;
+
+function createEmptySession(workItemType?:WorkflowItemTypeEnum): ChatSession {
+  const workflowType = workItemType ?? WorkflowItemTypeEnum.WorkflowItem;
   const session: ChatSession = {
     id: generateUniqId(),
     topic: DEFAULT_TOPIC,
@@ -92,11 +95,11 @@ function createEmptySession(scGNNWorkflow?:boolean): ChatSession {
     lastUpdate: Date.now(),
     lastSummarizeIndex: 0,
     mask: createEmptyMask(),
-    workflow: workflowMgr.createWorkflow(),
+    workflow: workflowMgr.createWorkflow(WorkflowItemTypeEnum.WorkflowItem),
     taskIds: {},
   };
-  if (scGNNWorkflow) {
-    session.workflow = workflowMgr.createWorkflow(session);
+  if (workItemType) {
+    session.workflow = workflowMgr.createWorkflow(workflowType);
   }
   return session;
 }
@@ -150,7 +153,7 @@ function fillTemplateWith(input: string, modelConfig: ModelConfig) {
 }
 
 const DEFAULT_CHAT_STATE = {
-  sessions: [createEmptySession(true)],
+  sessions: [createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowItem)],
   currentSessionIndex: 0,
 };
 
@@ -224,7 +227,7 @@ export const useChatStore = createPersistStore(
       },
       clearSessions() {
         set(() => ({
-          sessions: [createEmptySession(true)],
+          sessions: [createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowItem)],
           currentSessionIndex: 0,
         }));
       },
@@ -261,7 +264,12 @@ export const useChatStore = createPersistStore(
       },
 
       newSession(mask?: Mask) {
-        const session = createEmptySession(true);
+        let session: any = undefined;
+        if (mask && mask.name === "scGNN helper") {
+          session = createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowExampleItem);
+        } else {
+          session = createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowItem);
+        }
 
         if (mask) {
           const config = useAppConfig.getState();
@@ -307,7 +315,7 @@ export const useChatStore = createPersistStore(
 
         if (deletingLastSession) {
           nextIndex = 0;
-          const session = createEmptySession(true);
+          const session = createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowItem);
           sessions.push(session);
         }
 
@@ -423,18 +431,10 @@ export const useChatStore = createPersistStore(
           return;
         }
 
-        var api: ClientApi;
-        if (modelConfig.model.startsWith("gemini")) {
-          api = new ClientApi(ModelProvider.GeminiPro);
-        } else {
-          api = new ClientApi(ModelProvider.GPT);
-        }
-
-        // make request
-        api.llm.chat({
-          messages: sendMessages,
-          config: { ...modelConfig, stream: true },
-          onUpdate(message) {
+        workflowMgr.chat(
+          sendMessages,
+          { ...modelConfig, stream: true},
+          (message) => { // onUpdate
             botMessage.streaming = true;
             if (message) {
               botMessage.content = message;
@@ -443,7 +443,7 @@ export const useChatStore = createPersistStore(
               session.messages = session.messages.concat();
             });
           },
-          onFinish(message, taskId?: string) {
+          (message, taskId?: string) => { // onFinish
             botMessage.streaming = false;
             botMessage.taskId = taskId;
             if (message) {
@@ -461,7 +461,7 @@ export const useChatStore = createPersistStore(
             }
             ChatControllerPool.remove(session.id, botMessage.id);
           },
-          onError(error) {
+          (error) => { // onError
             const isAborted = error.message.includes("aborted");
             botMessage.content +=
               "\n\n" +
@@ -482,7 +482,7 @@ export const useChatStore = createPersistStore(
 
             console.error("[Chat] failed ", error);
           },
-          onController(controller) {
+          (controller) => { // onController
             // collect controller for stop/retry
             ChatControllerPool.addController(
               session.id,
@@ -490,7 +490,7 @@ export const useChatStore = createPersistStore(
               controller,
             );
           },
-        });
+        );
       },
 
       getMemoryPrompt() {
@@ -741,10 +741,45 @@ export const useChatStore = createPersistStore(
       },
 
       requestSessionJobId() {
-        requestJobId().then(jobId => (
+        const session = get().currentSession();
+        workflowMgr.requestJobId(session).then(jobId => (
           this.updateCurrentSession((session) => (session.jobId = jobId))
         ))
       },
+      async requestUploadFile(file: File, dataType: string) {
+        const session = get().currentSession();
+        return await workflowMgr.requestUploadFile(session, file, dataType);
+      },
+      async requestLogs(taskId: string) {
+        const session = get().currentSession();
+        return await workflowMgr.requestLogs(session, taskId);
+      },
+      async requestJobFiles() {
+        const session = get().currentSession();
+        return await workflowMgr.requestJobFiles(session);
+      },
+      async requestDownloadJobFile(filename: string) {
+        const session = get().currentSession();
+        return await workflowMgr.requestDownloadJobFile(session, filename);
+      },
+      async requestDownloadTaskResultFile(taskId: string, filename: string) {
+        const session = get().currentSession();
+        return await workflowMgr.requestDownloadTaskResultFile(session, taskId, filename);
+      },
+      async requestRemoveJobFile(filename: string) {
+        const session = get().currentSession();
+        return await workflowMgr.requestRemoveJobFile(session, filename);
+      },
+      async requestTaskResults(taskId: string) {
+        const session = get().currentSession();
+        return await workflowMgr.requestTaskResults(session, taskId);
+      },
+      async requestJobTaskStatus() {
+        const session = get().currentSession();
+        return await workflowMgr.requestJobTasksStatus(session);
+      },
+
+      
     };
 
     workflowMgr.methods = methods;
