@@ -199,12 +199,10 @@ function runIdleJob(idleJobs: () => void) {
   }
 }
 
-export function Home({subPath}: {subPath: string}) {
+export function Home({user}: {user: string | null}) {
   useSwitchTheme();
   useLoadData();
   useHtmlLang();
-
-  const user = null;
 
 //  const chatIdleJobsCb = useChatStore().idleJobs;
 //  const taskListIdleJobsCb = useTaskListStore().idleJobs;
@@ -218,7 +216,7 @@ export function Home({subPath}: {subPath: string}) {
 
   useEffect(() => {
     console.log("[Config] got config from build time", getClientConfig());
-    useAccessStore.getState().fetch(subPath);
+    useAccessStore.getState().fetch();
 
     runIdleJob(idleJobs);
   }, []);

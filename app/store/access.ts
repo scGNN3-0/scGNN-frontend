@@ -9,7 +9,6 @@ import { getHeaders } from "../client/api";
 import { getClientConfig } from "../config/client";
 import { createPersistStore } from "../utils/store";
 import { ensure } from "../utils/clone";
-import { getFetchUrl } from "../utils/utils";
 
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
@@ -45,7 +44,6 @@ const DEFAULT_ACCESS_STATE = {
   disableGPT4: false,
   disableFastLink: false,
   customModels: "",
-  subPath: "",
 };
 
 export const useAccessStore = createPersistStore(
@@ -81,11 +79,10 @@ export const useAccessStore = createPersistStore(
         (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
       );
     },
-    fetch(subPath?: string) {
+    fetch() {
       if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;
       fetchState = 1;
-      const url = getFetchUrl(subPath??"", "/api/config");
-      fetch(url, {
+      fetch("/api/config", {
         method: "post",
         body: null,
         headers: {

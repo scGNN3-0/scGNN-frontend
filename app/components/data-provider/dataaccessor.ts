@@ -1,5 +1,4 @@
 import { ApiPath } from "@/app/constant";
-import { getFetchUrl } from "@/app/utils/utils";
 
 function get_json_header(): Record<string, string> {
   return {
@@ -12,10 +11,9 @@ export const requestUploadFile = async (
   jobId: string,
   file: File,
   dataType: string,
-  subPath: string,
 ) => {
   const FILEUPLOAD = ApiPath.JobFile;
-  let uploadPath = getFetchUrl(subPath??"", FILEUPLOAD);
+  let uploadPath = FILEUPLOAD;
   const data = new FormData();
   data.set('file', file);
   data.set('jobId', jobId);
@@ -28,11 +26,10 @@ export const requestUploadFile = async (
 }
 
 export const requestLogs = async (
-  taskId: string,
-  subPath: string,
+  taskId: string
 ) => {
   const LOGS = ApiPath.Logs;
-  let fetchPath = getFetchUrl(subPath??"", LOGS as string);
+  let fetchPath = LOGS as string;
   if (!fetchPath.endsWith('/')) {
     fetchPath += "/";
   }
@@ -43,11 +40,8 @@ export const requestLogs = async (
   return response;
 }
 
-export const requestJobFiles = async (
-  jobId: string,
-  subPath: string,
-) => {
-  const FILEURL = getFetchUrl(subPath??"", ApiPath.JobFiles + '/' + jobId);
+export const requestJobFiles = async (jobId: string) => {
+  const FILEURL = ApiPath.JobFiles + '/' + jobId;
   try {
     const res = await fetch(FILEURL, {
       method: "POST",      
@@ -59,12 +53,12 @@ export const requestJobFiles = async (
 }
 
 export const requestDownloadJobFile = async (
-  jobId: string, filename: string, subPath: string,
+  jobId: string, filename: string
 ) => {
-  const fetchUrl = getFetchUrl(subPath??"", ApiPath.JobFile + '?' + new URLSearchParams({
+  const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
-  }));
+  });
   try {
     const res = await fetch(fetchUrl, {method: "GET"});
     const data = await res.blob();
@@ -81,9 +75,9 @@ export const requestDownloadJobFile = async (
 }
 
 export const requestDownloadTaskResultFile = async (
-  taskId: string, filename: string, subPath: string,
+  taskId: string, filename: string
 ) => {
-  const fetchUrl = getFetchUrl(subPath??"", `${ApiPath.TaskResultFile}/${taskId}/${filename}`);
+  const fetchUrl = `${ApiPath.TaskResultFile}/${taskId}/${filename}`;
   try {
     const res = await fetch(fetchUrl, {method: "GET"});
     const data = await res.blob();
@@ -100,12 +94,12 @@ export const requestDownloadTaskResultFile = async (
 };
 
 export const requestRemoveJobFile = async (
-  jobId: string, filename: string, subPath: string
+  jobId: string, filename: string
 ) => {
-  const fetchUrl = getFetchUrl(subPath??"", ApiPath.JobFile + '?' + new URLSearchParams({
+  const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
-  }));
+  });
   try {
     const res = await fetch(fetchUrl, {method: "DELETE"});
   } catch (e: any) {
@@ -113,8 +107,8 @@ export const requestRemoveJobFile = async (
   }  
 }
 
-export const requestJobId = async(subPath: string) => {
-  const fetchUrl = getFetchUrl(subPath??"", ApiPath.JobId);
+export const requestJobId = async() => {
+  const fetchUrl = ApiPath.JobId;
   try {
     const res = await fetch(fetchUrl, {method: "POST"});
     const jsonBody = await res.json();
@@ -125,9 +119,9 @@ export const requestJobId = async(subPath: string) => {
   }
 }
 
-export const requestTaskResults = async (taskId: string, subPath: string) => {
+export const requestTaskResults = async (taskId: string) => {
   const RESULTS = ApiPath.ObtainResults;
-  let fetchPath = getFetchUrl(subPath??"", RESULTS as string);
+  let fetchPath = RESULTS as string;
   if (!fetchPath.endsWith("/")) {
     fetchPath += "/";
   }
@@ -142,8 +136,8 @@ export const requestTaskResults = async (taskId: string, subPath: string) => {
   return {results: []};
 };
 
-export const requestJobTasksStatus = async (jobId: string, subPath: string) => {
-  const JOBTASKSSTATUS = getFetchUrl(subPath??"", ApiPath.ObtainStatus);
+export const requestJobTasksStatus = async (jobId: string) => {
+  const JOBTASKSSTATUS = ApiPath.ObtainStatus;
   let fetchPath = JOBTASKSSTATUS as string;
   if (!fetchPath.endsWith("/")) {
     fetchPath += "/";
