@@ -1,10 +1,10 @@
 import { ClientApi, LLMConfig, MessageRole } from "../client/api";
-import { requestDownloadJobFile, requestDownloadTaskResultFile, requestJobFiles, requestJobId, requestJobTasksStatus, requestLogs, requestRemoveJobFile, requestTaskResults, requestUploadFile } from "../components/data-provider/dataaccessor";
-import { ModelProvider } from "../constant";
-import { ChatMessage, ChatSession } from "../store";
+import { requestDownloadJobFile, requestDownloadSampleDataFile, requestDownloadTaskResultFile, requestJobFiles, requestJobId, requestJobTasksStatus, requestLogs, requestRemoveJobFile, requestTaskResults, requestUploadFile } from "../components/data-provider/dataaccessor";
+import { HELPER_MASK_NAME, ModelProvider } from "../constant";
+import { ChatMessage, ChatSession, useAccessStore } from "../store";
 
 const is_demo_mode = (mask_name: string): boolean => {
-  return mask_name === "scGNN helper";
+  return mask_name === HELPER_MASK_NAME;
 }
 
 export enum WorkflowItemTypeEnum {
@@ -84,7 +84,7 @@ class scGNNWorkflowExampleItemHandler extends WorkflowItemHandler {
       wfi.data.step = 0;
     }
     this.methods.addNewMessage(
-      "\n\nYou've uploaded data files successfully, you can now view, delete or download the uploaded file in file manager."
+      "\n\nYou've uploaded data files successfully, you can now view, delete or download the uploaded file in **\"file manager\"** located above message input box."
     );
     setTimeout(() => {
       this.methods.addNewMessage(
@@ -100,10 +100,11 @@ class scGNNWorkflowExampleItemHandler extends WorkflowItemHandler {
     if (taskId === undefined  || taskId.length === 0) {
       return
     }
-    setTimeout(() => {
-      this.methods.addNewMessage(`Task ${taskId} has been submitted. After it is done, you can input\
-       "I want to draw a headtmap figure by using this task ${taskId} result files" to show result image. \n\nOr \
-        input "I want to change a colormap to Reds and draw this heatmap figure by using this task ${taskId} result files."`);
+    setTimeout(() => {      
+      this.methods.addNewMessage(`Task ${taskId} has been successfully submitted. Once it is completed, you can enter the following commands to view the result image:\n\
+      "I want to draw a heatmap figure using the result files from Task 242."\n\
+      "I want to change the colormap to Reds and create a heatmap figure with the Task 242 result files."\n\
+      Alternatively, you can organize the result files using the **"file manager"** situated above the message input box.`);
     }, 2000);
   }
   
@@ -193,30 +194,43 @@ export class WorkflowManager {
     })
   }
   async requestJobId(session: ChatSession) {
-    return await requestJobId(is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestJobId(is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestUploadFile(session: ChatSession, file: File, dataType: string) {
-    return await requestUploadFile(session.jobId??"", file, dataType, is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestUploadFile(session.jobId??"", file, dataType, is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestLogs(session: ChatSession, taskId: string) {
-    return await requestLogs(taskId, is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestLogs(taskId, is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestJobFiles(session: ChatSession) {
-    return await requestJobFiles(session.jobId??"", is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestJobFiles(session.jobId??"", is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestDownloadJobFile(session: ChatSession, filename: string) {
-    return await requestDownloadJobFile(session.jobId??"", filename, is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestDownloadJobFile(session.jobId??"", filename, is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestDownloadTaskResultFile(session: ChatSession, taskId: string, filename: string) {
-    return await requestDownloadTaskResultFile(taskId, filename, is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestDownloadTaskResultFile(taskId, filename, is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestRemoveJobFile(session: ChatSession, filename: string) {
-    return await requestRemoveJobFile(session.jobId??"", filename, is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestRemoveJobFile(session.jobId??"", filename, is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestTaskResults(session: ChatSession, taskId: string) {
-    return await requestTaskResults(taskId, is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestTaskResults(taskId, is_demo_mode(session.mask.name), accessStore.subPath);
   }
   async requestJobTasksStatus(session: ChatSession) {
-    return await requestJobTasksStatus(session.jobId??"", is_demo_mode(session.mask.name));
+    const accessStore = useAccessStore.getState();
+    return await requestJobTasksStatus(session.jobId??"", is_demo_mode(session.mask.name), accessStore.subPath);
+  }
+  async requestDownloadSampleDataFile(session: ChatSession) {
+    const accessStore = useAccessStore.getState();
+    return await requestDownloadSampleDataFile(is_demo_mode(session.mask.name), accessStore.subPath);
   }
 }

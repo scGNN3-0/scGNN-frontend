@@ -9,6 +9,7 @@ import { getHeaders } from "../client/api";
 import { getClientConfig } from "../config/client";
 import { createPersistStore } from "../utils/store";
 import { ensure } from "../utils/clone";
+import { getFetchUrl } from "../utils/utils"
 
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
@@ -44,6 +45,8 @@ const DEFAULT_ACCESS_STATE = {
   disableGPT4: false,
   disableFastLink: false,
   customModels: "",
+  subPath: "",
+  startTour: false,
 };
 
 export const useAccessStore = createPersistStore(
@@ -82,7 +85,8 @@ export const useAccessStore = createPersistStore(
     fetch() {
       if (fetchState > 0 || getClientConfig()?.buildMode === "export") return;
       fetchState = 1;
-      fetch("/api/config", {
+      const url = getFetchUrl("", "/api/config");
+      fetch(url, {
         method: "post",
         body: null,
         headers: {
@@ -100,6 +104,12 @@ export const useAccessStore = createPersistStore(
         .finally(() => {
           fetchState = 2;
         });
+    },
+    isTourStarted() {
+      return get().startTour;
+    },
+    setTourStart(v: boolean) {
+      set({startTour: v});
     },
   }),
   {

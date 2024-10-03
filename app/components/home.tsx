@@ -139,6 +139,10 @@ function Screen({user}: {user: string | null}) {
     loadAsyncGoogleFont();
   }, []);
 
+  function getHomeScreen() {
+    return (<Chat />);
+  }
+
   return (
     <div
       className={
@@ -158,7 +162,7 @@ function Screen({user}: {user: string | null}) {
 
           <div className={styles["window-content"]} id={SlotID.AppBody}>
             <Routes>
-              <Route path={Path.Home} element={<Chat />} />
+              <Route path={Path.Home} element={getHomeScreen()} />
               <Route path={Path.NewChat} element={<NewChat />} />
               <Route path={Path.Masks} element={<MaskPage />} />
               <Route path={Path.Chat} element={<Chat />} />
@@ -199,10 +203,12 @@ function runIdleJob(idleJobs: () => void) {
   }
 }
 
-export function Home({user}: {user: string | null}) {
+export function Home() {
   useSwitchTheme();
   useLoadData();
   useHtmlLang();
+
+  const user = null;
 
 //  const chatIdleJobsCb = useChatStore().idleJobs;
 //  const taskListIdleJobsCb = useTaskListStore().idleJobs;
