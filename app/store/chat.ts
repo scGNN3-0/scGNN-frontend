@@ -9,6 +9,7 @@ import {
   DEFAULT_INPUT_TEMPLATE,
   DEFAULT_MODELS,
   DEFAULT_SYSTEM_TEMPLATE,
+  HELPER_MASK_NAME,
   KnowledgeCutOffDate,
   ModelProvider,
   StoreKey,
@@ -20,7 +21,6 @@ import { prettyObject } from "../utils/format";
 import { estimateTokenLength } from "../utils/token";
 import { createPersistStore } from "../utils/store";
 import { WorkflowItem, WorkflowItemTypeEnum, WorkflowManager } from "../workflows/workflowbase";
-import { Session } from "inspector";
 import { isImageFile } from "../utils/file";
 
 const generateUniqId = () => uuidv4();
@@ -175,7 +175,7 @@ export const useChatStore = createPersistStore(
       result.forEach((r: string) => {
         if (isImageFile(r) && taskId in get().currentSession().taskIds) {
           // get().addNewMessage(`${r} <br /> ![result image](/api/task/results/image/${taskId}/${r})`, "assistant", false);
-          get().addNewMessage(`task ${taskId} result: ${r} <br /> <img src="/api/task/results/image/${taskId}/${r}" alt="Result Image" width="400" />`, 
+          get().addNewMessage(`task ${taskId} result: ${r} <br /> <img src="/scgnn3/api/task/results/image/${taskId}/${r}" alt="Result Image" width="400" />`, 
             "assistant", false
           );
         }
@@ -236,7 +236,10 @@ export const useChatStore = createPersistStore(
           currentSessionIndex: index,
         });
       },
-
+      isCurrentSessionHelperSession() {
+        const session = get().currentSession();
+        return session.mask && session.mask.name === HELPER_MASK_NAME;
+      },
       moveSession(from: number, to: number) {
         set((state) => {
           const { sessions, currentSessionIndex: oldIndex } = state;
@@ -264,7 +267,7 @@ export const useChatStore = createPersistStore(
 
       newSession(mask?: Mask) {
         let session: any = undefined;
-        if (mask && mask.name === "scGNN helper") {
+        if (mask && mask.name === HELPER_MASK_NAME) {
           session = createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowExampleItem);
         } else {
           session = createEmptySession(WorkflowItemTypeEnum.scGNNWorkflowItem);
@@ -778,7 +781,10 @@ export const useChatStore = createPersistStore(
         const session = get().currentSession();
         return await workflowMgr.requestJobTasksStatus(session);
       },
-
+      async requestDownloadSampleDataFile() {
+        const session = get().currentSession();
+        return await workflowMgr.requestDownloadSampleDataFile(session);
+      }
       
     };
 

@@ -33,6 +33,7 @@ const nextConfig = {
   experimental: {
     forceSwcTransforms: true,
   },
+
 };
 
 const CorsHeaders = [
@@ -92,5 +93,6 @@ if (mode !== "export") {
     };
   };
 }
+
 
 export default nextConfig;

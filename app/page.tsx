@@ -14,7 +14,7 @@ export default async function App() {
   const user = "unknown";
   return (
     <>
-      <Home user={user} />
+      <Home />
       {serverConfig?.isVercel && (
         <>
           <Analytics />

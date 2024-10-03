@@ -1,4 +1,5 @@
-import { ApiPath } from "@/app/constant";
+import { ApiPath, SAMPLE_DATA_FILENAME } from "@/app/constant";
+import { getFetchUrl } from "@/app/utils/utils";
 
 function get_json_header(): Record<string, string> {
   return {
@@ -11,10 +12,11 @@ export const requestUploadFile = async (
   jobId: string,
   file: File,
   dataType: string,
-  demoMode: boolean
+  demoMode: boolean,
+  subPath: string,
 ) => {
   const FILEUPLOAD = ApiPath.JobFile;
-  let uploadPath = FILEUPLOAD;
+  let uploadPath = getFetchUrl(subPath, FILEUPLOAD);
   const data = new FormData();
   data.set('file', file);
   data.set('jobId', jobId);
@@ -28,10 +30,10 @@ export const requestUploadFile = async (
 }
 
 export const requestLogs = async (
-  taskId: string, demoMode: boolean
+  taskId: string, demoMode: boolean, subPath: string,
 ) => {
   const LOGS = ApiPath.Logs;
-  let fetchPath = LOGS as string;
+  let fetchPath = getFetchUrl(subPath, LOGS as string);
   if (!fetchPath.endsWith('/')) {
     fetchPath += "/";
   }
@@ -46,8 +48,8 @@ export const requestLogs = async (
   return response;
 }
 
-export const requestJobFiles = async (jobId: string, demoMode: boolean) => {
-  const FILEURL = ApiPath.JobFiles + '/' + jobId;
+export const requestJobFiles = async (jobId: string, demoMode: boolean, subPath: string) => {
+  const FILEURL = getFetchUrl(subPath, ApiPath.JobFiles + '/' + jobId);
   try {
     const res = await fetch(FILEURL, {
       method: "POST",     
@@ -63,13 +65,13 @@ export const requestJobFiles = async (jobId: string, demoMode: boolean) => {
 }
 
 export const requestDownloadJobFile = async (
-  jobId: string, filename: string, demoMode: boolean
+  jobId: string, filename: string, demoMode: boolean, subPath: string
 ) => {
-  const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
+  const fetchUrl = getFetchUrl(subPath, ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
     example_mode: demoMode.toString(),
-  });
+  }));
   try {
     const res = await fetch(fetchUrl, {method: "GET"});
     const data = await res.blob();
@@ -85,10 +87,32 @@ export const requestDownloadJobFile = async (
   }
 }
 
+export const requestDownloadSampleDataFile = async (demoMode: boolean, subPath: string) => {
+  const fetchUrl = getFetchUrl(subPath, ApiPath.SampleDataFile + '?' + new URLSearchParams({
+    example_mode: demoMode.toString(),
+  }));
+  try {
+    const res = await fetch(fetchUrl, {method: "GET"});
+    const data = await res.blob();
+    const url = window.URL.createObjectURL(new Blob([data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = SAMPLE_DATA_FILENAME;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (e: any) {
+    console.error(e);
+  }
+};
+
 export const requestDownloadTaskResultFile = async (
-  taskId: string, filename: string, demoMode: boolean
+  taskId: string, filename: string, demoMode: boolean, subPath: string,
 ) => {
-  const fetchUrl = `${ApiPath.TaskResultFile}/${taskId}/${filename}?example_mode=${demoMode}`;
+  const fetchUrl = getFetchUrl(
+    subPath, 
+    `${ApiPath.TaskResultFile}/${taskId}/${filename}?example_mode=${demoMode}`
+  );
   try {
     const res = await fetch(fetchUrl, {method: "GET"});
     const data = await res.blob();
@@ -105,12 +129,12 @@ export const requestDownloadTaskResultFile = async (
 };
 
 export const requestRemoveJobFile = async (
-  jobId: string, filename: string, demoMode: boolean
+  jobId: string, filename: string, demoMode: boolean, subPath: string,
 ) => {
-  const fetchUrl = ApiPath.JobFile + '?' + new URLSearchParams({
+  const fetchUrl = getFetchUrl(subPath, ApiPath.JobFile + '?' + new URLSearchParams({
     jobId,
     filename,
-  });
+  }));
   try {
     const res = await fetch(fetchUrl, {
       method: "DELETE", 
@@ -124,8 +148,8 @@ export const requestRemoveJobFile = async (
   }  
 }
 
-export const requestJobId = async(demoMode: boolean) => {
-  const fetchUrl = ApiPath.JobId;
+export const requestJobId = async(demoMode: boolean, subPath: string) => {
+  const fetchUrl = getFetchUrl(subPath, ApiPath.JobId);
   try {
     const res = await fetch(fetchUrl, {
       method: "POST", 
@@ -142,9 +166,9 @@ export const requestJobId = async(demoMode: boolean) => {
   }
 }
 
-export const requestTaskResults = async (taskId: string, demoMode: boolean) => {
+export const requestTaskResults = async (taskId: string, demoMode: boolean, subPath: string) => {
   const RESULTS = ApiPath.ObtainResults;
-  let fetchPath = RESULTS as string;
+  let fetchPath = getFetchUrl(subPath, RESULTS as string);
   if (!fetchPath.endsWith("/")) {
     fetchPath += "/";
   }
@@ -163,19 +187,22 @@ export const requestTaskResults = async (taskId: string, demoMode: boolean) => {
   return {results: []};
 };
 
-export const requestJobTasksStatus = async (jobId: string, demoMode: boolean) => {
-  const JOBTASKSSTATUS = ApiPath.ObtainStatus;
+export const requestJobTasksStatus = async (jobId: string, demoMode: boolean, subPath: string) => {
+  const JOBTASKSSTATUS = getFetchUrl(subPath, ApiPath.ObtainStatus);
   let fetchPath = JOBTASKSSTATUS as string;
   if (!fetchPath.endsWith("/")) {
     fetchPath += "/";
   }
   fetchPath += jobId;
+  const theJsonObj = JSON.stringify({example_mode: demoMode});
+  console.log(theJsonObj);
+
   const response = await fetch (fetchPath, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({example_mode: demoMode})
+    body: theJsonObj,
   });
   if (response.ok) {
     const jsonObj = await response.json();

@@ -53,14 +53,14 @@ export const EN_MASKS: BuiltinMask[] = [
       {
         id: "scgnn-helper-1",
         role: "system",
-        content: "scGNN3.0 is an advanced web server designed to facilitate the analysis and visualization of single-cell genomics data using the scGNN model. Built on the powerful framework of ChatGPT-4.0, scGNN3.0 offers a unique interactive prompting interface that enhances user experience and efficiency in data processing and exploration.Users start sessions by inputting commands or queries, and each session is uniquely identified with a job ID for tracking and reference.",
+        content: "scGNN+ is an advanced web server designed to facilitate the analysis and visualization of single-cell genomics data using the scGNN model. Built on the powerful framework of ChatGPT-4.0, scGNN+ offers a unique interactive prompting interface that enhances user experience and efficiency in data processing and exploration.Users start sessions by inputting commands or queries, and each session is uniquely identified with a job ID for tracking and reference.",
         date: "",
       },
       {
         id: "scgnn-helper-2",
         role: "assistant",
         content:
-          "To begin, please upload the sample data file \"data_example.h5ad\" first.\nYou can click \"upload file\" button located above message input to upload file.",
+          "To get started, please upload the sample data file **\"example_expression.h5ad\"** first. You can access the sample file by clicking the **\"Download Sample File\"** button. To upload the file, simply find and select the **\"upload file\"** button positioned above the message input box.",
         date: "",
       },
     ],
